@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+window.addEventListener('error', function (e) {
+  var d = document.getElementById('errBanner');
+  if (!d) { d = document.createElement('div'); d.id = 'errBanner'; d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;padding:8px 12px;font:12px monospace;direction:ltr;white-space:pre-wrap'; document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(d); }); if (document.body) document.body.appendChild(d); }
+  d.textContent += 'JS error: ' + e.message + ' (line ' + e.lineno + ')\n';
+});
+</script>
 <title>تیم EP | تورنمنت‌ها و جستجوی اعضا</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -223,7 +230,7 @@ body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(900px 500px a
 <script>
 const ADMIN_PASS = "محمد حسین EP";
 const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 let isAdmin = false;
@@ -301,16 +308,4 @@ function setWin(r, m, s, silent) {
   if (!(s === 1 ? x.a : x.b)) return;
   if (x.w === s) s = 0;
   resetUp(r, m);
-  if (s) { x.w = s; const nx = B.rounds[r + 1] && B.rounds[r + 1][m >> 1]; if (nx) nx[m % 2 ? 'b' : 'a'] = s === 1 ? x.a : x.b; }
-  if (!silent) commitBracket();
-}
-function setName(r, m, k, v) {
-  const x = B.rounds[r][m]; x[k] = v.trim();
-  if (x.w === (k === 'a' ? 1 : 2)) { const nx = B.rounds[r + 1] && B.rounds[r + 1][m >> 1]; if (nx) nx[m % 2 ? 'b' : 'a'] = x[k]; }
-  commitBracket();
-}
-function resetResults() {
-  if (!B || !confirm('همه نتایج پاک شود؟ (کادرهای دور اول می‌مانند)')) return;
-  B.rounds.forEach((rd, r) => rd.forEach(x => { x.w = 0; if (r > 0) { x.a = ''; x.b = ''; } }));
-  B.rounds[0].forEach((x, i) => { if (x.a && !x.b) setWin(0, i, 1, true); });
-  com
+  if (s) { x.w = s; const nx = B.rounds[r + 1] && B.rounds[r + 1][m >> 1]; if (nx) n
