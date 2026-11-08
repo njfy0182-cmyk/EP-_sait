@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تیم EP | تورنمنت‌ها و جستجوی اعضا</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0f0202 0%, #1a0505 50%, #2b0808 100%);
+            color: #f3f4f6;
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(30, 10, 10, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .glass-card {
+            background: rgba(40, 12, 12, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="glass rounded-2xl p-6 text-center relative overflow-hidden shadow-2xl">
+            <div class="absolute inset-0 bg-gradient-to-r from-red-900/20 via-transparent to-red-900/20 animate-pulse"></div>
+            <h1 class="text-4xl md:text-5xl font-black text-red-500 tracking-wider mb-2">تیم EP</h1>
+            <p class="text-gray-400 text-sm md:text-base">سامانه جستجوی بازیکنان و قرعه‌کشی تورنمنت‌ها</p>
+            <button onclick="openAdminModal()" class="absolute top-4 left-4 bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white px-4 py-2 rounded-xl text-sm transition border border-red-500/30 flex items-center gap-2">
+                <span>⚙️ پنل مدیریت</span>
+            </button>
+        </header>
+
+        <!-- Search Section (Centered) -->
+        <section class="glass rounded-2xl p-6 text-center shadow-xl">
+            <h2 class="text-xl font-bold mb-4 text-red-400">جستجوی بازیکنان</h2>
+            <div class="max-w-md mx-auto relative mb-6">
+                <input type="text" id="searchInput" oninput="filterPlayers()" placeholder="جستجو بر اساس نام واقعی، آیدی بازی یا بله..." class="w-full bg-black/40 border border-red-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition text-center">
+            </div>
+            <!-- Search Results Display -->
+            <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+                <div class="text-gray-400 text-center col-span-full py-2">نام یا آیدی بازیکن را برای جستجو وارد کنید...</div>
+            </div>
+        </section>
+
+        <!-- Tournaments Section (8 to 40 players) -->
+        <section class="glass rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 border-b border-red-900/50 pb-3">
+                <h2 class="text-xl font-bold text-red-400">تورنمنت‌های ۸ تا ۴۰ نفره</h2>
+                <div class="flex items-center gap-3">
+                    <label for="tournamentSize" class="text-sm text-gray-300">تعداد:</label>
+                    <select id="tournamentSize" class="bg-black/40 border border-red-500/30 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-red-500">
+                        <option value="8">۸ نفره</option>
+                        <option value="16">۱۶ نفره</option>
+                        <option value="24">۲۴ نفره</option>
+                        <option value="32">۳۲ نفره</option>
+                        <option value="40">۴۰ نفره</option>
+                    </select>
+                    <button onclick="runLuckyDraw()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm transition shadow-lg shadow-red-900/30">🎲 قرعه‌کشی</button>
+                </div>
+            </div>
+            <div id="tournamentResult" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div class="glass-card p-4 rounded-xl text-center text-gray-400 col-span-full">
+                    روی دکمه قرعه‌کشی کلیک کنید.
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Players Section -->
+        <section class="glass rounded-2xl p-6 shadow-xl">
+            <h2 class="text-xl font-bold mb-6 text-red-400 border-b border-red-900/50 pb-3">🏆 نفرات برتر تیم</h2>
+            <div id="topPlayersList" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Filled by JS -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="glass rounded-2xl p-6 max-w-lg w-full relative border border-red-500/40 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminModal()" class="absolute top-4 left-4 text-gray-400 hover:text-white text-lg">✕</button>
+            <h3 class="text-xl font-bold text-red-400 mb-4">پنل مدیریت پیشرفته</h3>
+            
+            <div id="adminLoginBox" class="space-y-4">
+                <input type="password" id="adminPasswordInput" placeholder="رمز عبور مدیریت..." class="w-full bg-black/40 border border-red-500/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500">
+                <button onclick="verifyAdmin()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition">ورود</button>
+            </div>
+
+            <div id="adminDashboard" class="hidden space-y-6">
+                <p class="text-green-400 text-sm">✅ دسترسی مدیریت تایید شد.</p>
+                
+                <!-- Add / Edit Player Form -->
+                <div class="space-y-3 bg-black/30 p-4 rounded-xl border border-red-900/50">
+                    <h4 id="formTitle" class="font-bold text-sm text-yellow-400">افزودن بازیکن جدید:</h4>
+                    <input type="hidden" id="editIndex" value="-1">
+                    <input type="text" id="newRealName" placeholder="نام واقعی" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <input type="text" id="newGameName" placeholder="نام بازی" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <input type="text" id="newBale" placeholder="آیدی بله" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <input type="text" id="newRank" placeholder="رنک / درجه" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <input type="text" id="newRole" placeholder="نقش" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <input type="text" id="newCode" placeholder="کد بازی / دعوت" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <input type="text" id="newActivity" placeholder="میزان فعالیت (مثلا 100%)" class="w-full bg-black/40 border border-red-500/30 rounded-lg px-3 py-2 text-sm text-white">
+                    <div class="flex gap-2">
+                        <button onclick="savePlayer()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-bold transition">ذخیره بازیکن</button>
+                        <button onclick="resetForm()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm transition">لغو</button>
+                    </div>
+                </div>
+
+                <!-- Players Management List -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-sm text-gray-300">مدیریت اعضا (ویرایش / حذف):</h4>
+                    <div id="adminPlayersList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "محمد حسین EP";
+
+        let defaultPlayers = [
+            { realName: "آرمین", gameName: "EP●A P A C H I", bale: "@armin808090", rank: "-", role: "عضو عادی", code: "UG2HOPO4D3", activity: "100%" },
+            { realName: "میلاد", gameName: "Ep2 milad", bale: "@ghbjnuhihj", rank: "-", role: "عضو عادی", code: "D3873Z6", activity: "100%" },
+            { realName: "محمد", gameName: "EP³| HEMAT", bale: "-", rank: "-", role: "عضو عادی", code: "49UDFOLYZ9", activity: "100%" },
+            { realName: "رسول کریمی", gameName: "moghavemat", bale: "@rasoolkarimi", rank: "-", role: "عضو عادی", code: "5WBHKHL7XP", activity: "100%" },
+            { realName: "ابراهیم", gameName: "eb • EP", bale: "@mmmmm111166", rank: "-", role: "عضو عادی", code: "8YAF5WXU4N", activity: "100%" },
+            { realName: "احسان", gameName: "EH3AN.EP³", bale: "@Mehre73", rank: "-", role: "عضو عادی", code: "-", activity: "100%" },
+            { realName: "EHSAN (امیر)", gameName: "Rambo", bale: "@a_n1652021", rank: "-", role: "عضو عادی", code: "2B1EQ1V5CJ", activity: "100%" },
+            { realName: "طاها", gameName: "EP² | TAHA", bale: "@taha8797", rank: "-", role: "عضو عادی", code: "XPCEH7Z", activity: "100%" },
+            { realName: "رضا", gameName: "میگ میگ|EP³", bale: "@Reza_995", rank: "-", role: "عضو عادی", code: "HP74WZE", activity: "100%" },
+            { realName: "پویان", gameName: "PERSIA CYRUS EP³", bale: "@PC777", rank: "-", role: "عضو عادی", code: "UDEKSAA", activity: "100%" },
+            { realName: "شایان", gameName: "ایران شاه", bale: "@kkdddktkrrkfr", rank: "-", role: "عضو عادی", code: "ORW8Q9C6EK", activity: "100%" },
+            { realName: "امیر", gameName: "EP3 •AMIR.", bale: "@AMIR89236", rank: "-", role: "عضو عادی", code: "9AHP9YPZ1C", activity: "100%" }
+        ];
+
+        let players = JSON.parse(localStorage.getItem('ep_players')) || defaultPlayers;
+
+        function savePlayersToStorage() {
+            localStorage.setItem('ep_players', JSON.stringify(players));
+        }
+
+        function filterPlayers() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resDiv = document.getElementById('searchResults');
+            resDiv.innerHTML = '';
+
+            if(!query) {
+                resDiv.innerHTML = '<div class="text-gray-400 text-center col-span-full py-2">نام یا آیدی بازیکن را برای جستجو وارد کنید...</div>';
+                return;
+            }
+
+            const filtered = players.filter(p => 
+                p.realName.toLowerCase().includes(query) || 
+                p.gameName.toLowerCase().includes(query) || 
+                p.bale.toLowerCase().includes(query) ||
+                p.code.toLowerCase().includes(query)
+            );
+
+            if(filtered.length === 0) {
+                resDiv.innerHTML = '<div class="text-red-400 text-center col-span-full py-2">بازیکنی با این مشخصات یافت نشد.</div>';
+                return;
+            }
+
+            filtered.forEach(p => {
+                resDiv.innerHTML += `
+                    <div class="glass-card p-4 rounded-xl space-y-1">
+                        <div class="font-bold text-red-300 text-base">${p.gameName}</div>
+                        <div class="text-sm text-gray-300">نام واقعی: <span class="text-white font-medium">${p.realName}</span></div>
+                        <div class="text-xs text-gray-400">آیدی بله: ${p.bale}</div>
+                        <div class="text-xs text-yellow-400">درجه: ${p.rank} | نقش: ${p.role}</div>
+                        <div class="text-xs text-yellow-200 font-mono">کد: ${p.code}</div>
+                        <div class="text-xs text-green-400 font-bold">فعالیت: ${p.activity}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderTopPlayers() {
+            const topDiv = document.getElementById('topPlayersList');
+            topDiv.innerHTML = '';
+            const sorted = [...players].sort((a, b) => parseInt(b.activity) - parseInt(a.activity)).slice(0, 3);
+            sorted.forEach((p, idx) => {
+                topDiv.innerHTML += `
+                    <div class="glass-card p-4 rounded-xl flex items-center gap-4">
+                        <div class="text-2xl font-black text-red-500">#${idx + 1}</div>
+                        <div>
+                            <div class="font-bold text-white">${p.gameName}</div>
+                            <div class="text-xs text-gray-400">${p.realName} (${p.rank}) - ${p.role}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function runLuckyDraw() {
+            if(players.length === 0) return;
+            const requestedSize = parseInt(document.getElementById('tournamentSize').value) || 8;
+            const targetCount = Math.min(requestedSize, players.length);
+            
+            const shuffled = [...players].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, targetCount);
+            
+            const resultDiv = document.getElementById('tournamentResult');
+            resultDiv.innerHTML = '';
+            selected.forEach((p, i) => {
+                resultDiv.innerHTML += `
+                    <div class="glass-card p-3 rounded-xl text-center">
+                        <div class="text-[10px] text-red-400 mb-1">نفر ${i+1}</div>
+                        <div class="font-bold text-white text-sm truncate">${p.gameName}</div>
+                        <div class="text-[11px] text-yellow-400 mt-1">${p.realName}</div>
+                        <div class="text-[10px] text-gray-400 font-mono mt-0.5">${p.code}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            document.getElementById('adminModal').classList.add('flex');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+            document.getElementById('adminModal').classList.remove('flex');
+        }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if(pass === ADMIN_PASS) {
+                document.getElementById('adminLoginBox').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                renderAdminPlayersList();
+            } else {
+                alert('رمز عبور اشتباه است!');
+            }
+        }
+
+        function renderAdminPlayersList() {
+            const listDiv = document.getElementById('adminPlayersList');
+            listDiv.innerHTML = '';
+            players.forEach((p, idx) => {
+                listDiv.innerHTML += `
+                    <div class="flex justify-between items-center bg-black/40 p-2 rounded-lg border border-red-500/20 text-sm">
+                        <div>
+                            <span class="font-bold text-white">${p.gameName}</span> 
+                            <span class="text-xs text-gray-400">(${p.realName})</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editPlayer(${idx})" class="bg-blue-600/50 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">ویرایش</button>
+                            <button onclick="deletePlayer(${idx})" class="bg-red-600/50 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function savePlayer() {
+            const editIdx = parseInt(document.getElementById('editIndex').value);
+            const newP = {
+                realName: document.getElementById('newRealName').value || "ناشناس",
+                gameName: document.getElementById('newGameName').value || "EP Player",
+                bale: document.getElementById('newBale').value || "-",
+                rank: document.getElementById('newRank').value || "-",
+                role: document.getElementById('newRole').value || "عضو عادی",
+                code: document.getElementById('newCode').value || "-",
+                activity: document.getElementById('newActivity').value || "100%"
+            };
+
+            if(editIdx === -1) {
+                players.push(newP);
+            } else {
+                players[editIdx] = newP;
+            }
+
+            savePlayersToStorage();
+            renderTopPlayers();
+            renderAdminPlayersList();
+            resetForm();
+            alert('با موفقیت ذخیره شد!');
+        }
+
+        function editPlayer(idx) {
+            const p = players[idx];
+            document.getElementById('editIndex').value = idx;
+            document.getElementById('newRealName').value = p.realName;
+            document.getElementById('newGameName').value = p.gameName;
+            document.getElementById('newBale').value = p.bale;
+            document.getElementById('newRank').value = p.rank;
+            document.getElementById('newRole').value = p.role;
+            document.getElementById('newCode').value = p.code;
+            document.getElementById('newActivity').value = p.activity;
+            document.getElementById('formTitle').innerText = "ویرایش مشخصات بازیکن:";
+        }
+
+        function deletePlayer(idx) {
+            if(confirm('آیا از حذف این بازیکن مطمئن هستید؟')) {
+                players.splice(idx, 1);
+                savePlayersToStorage();
+                renderTopPlayers();
+                renderAdminPlayersList();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('editIndex').value = -1;
+            document.getElementById('newRealName').value = '';
+            document.getElementById('newGameName').value = '';
+            document.getElementById('newBale').value = '';
+            document.getElementById('newRank').value = '';
+            document.getElementById('newRole').value = '';
+            document.getElementById('newCode').value = '';
+            document.getElementById('newActivity').value = '';
+            document.getElementById('formTitle').innerText = "افزودن بازیکن جدید:";
+        }
+
+        // Initial render
+        renderTopPlayers();
+    </script>
+</body>
+              </html>
+                                                                                                                        
