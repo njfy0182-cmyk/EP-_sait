@@ -12,7 +12,7 @@ function showErr(msg) {
 window.addEventListener('error', function (e) { showErr('خطای جاوااسکریپت: ' + e.message + ' (خط ' + e.lineno + ')'); });
 window.addEventListener('load', function () {
   setTimeout(function () {
-    if (typeof renderAll !== 'function') showErr('اسکریپت سایت اجرا نشد. یا فایل ناقص آپلود شده، یا صفحه با پروکسی/پیش‌نمایش (مثل htmlpreview) باز شده. از GitHub Pages استفاده کن.');
+    if (typeof renderAll !== 'function') showErr('فایل app.js ناقص یا قدیمی آپلود شده. آن را دوباره (با Upload files، نه کپی و پیست) کنار index.html آپلود کن.');
   }, 600);
 });
 </script>
@@ -58,7 +58,7 @@ body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(900px 500px a
 <header class="glass rounded-2xl p-6 text-center relative overflow-hidden shadow-2xl hdr-glow">
   <h1 class="text-4xl md:text-5xl font-black grad-text mb-2">تیم EP</h1>
   <p class="text-gray-400 text-sm md:text-base">جستجوی بازیکنان، تورنمنت و ترکیب تیم‌ها</p>
-  <p class="text-[10px] text-gray-600 mt-1">نسخه ۱۳</p>
+  <p class="text-[10px] text-gray-600 mt-1">نسخه ۱۴</p>
   <button onclick="openAdminModal()" class="absolute top-3 left-3 bg-teal-400/15 hover:bg-teal-500 text-teal-100 hover:text-white px-3 py-2 rounded-xl text-xs md:text-sm transition border border-teal-300/30">⚙️ پنل مدیریت</button>
   <span class="adm absolute top-3 right-3 bg-green-600/30 text-green-300 text-xs px-3 py-1 rounded-full border border-green-500/40">حالت مدیر فعال</span>
 </header>
@@ -234,71 +234,6 @@ body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(900px 500px a
   </div>
 </div>
 
-<script>
-"use strict";
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-var ADMIN_PASS = "محمد حسین EP";
-var $ = function (id) { return document.getElementById(id); };
-var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]); }); };
-var load = function (k, d) { try {
-    return JSON.parse(localStorage.getItem(k)) || d;
-}
-catch (e) {
-    return d;
-} };
-var save = function (k, v) { try {
-    localStorage.setItem(k, JSON.stringify(v));
-}
-catch (e) { } };
-var isAdmin = false;
-var defaultPlayers = [
-    { realName: "آرمین", gameName: "EP●A P A C H I", bale: "@armin808090", rank: "-", role: "عضو عادی", code: "UG2HOPO4D3", activity: "100%" },
-    { realName: "میلاد", gameName: "Ep2 milad", bale: "@ghbjnuhihj", rank: "-", role: "عضو عادی", code: "D3873Z6", activity: "100%" },
-    { realName: "محمد", gameName: "EP³| HEMAT", bale: "-", rank: "-", role: "عضو عادی", code: "49UDFOLYZ9", activity: "100%" },
-    { realName: "رسول کریمی", gameName: "moghavemat", bale: "@rasoolkarimi", rank: "-", role: "عضو عادی", code: "5WBHKHL7XP", activity: "100%" },
-    { realName: "ابراهیم", gameName: "eb • EP", bale: "@mmmmm111166", rank: "-", role: "عضو عادی", code: "8YAF5WXU4N", activity: "100%" },
-    { realName: "احسان", gameName: "EH3AN.EP³", bale: "@Mehre73", rank: "-", role: "عضو عادی", code: "-", activity: "100%" },
-    { realName: "EHSAN (امیر)", gameName: "Rambo", bale: "@a_n1652021", rank: "-", role: "عضو عادی", code: "2B1EQ1V5CJ", activity: "100%" },
-    { realName: "طاها", gameName: "EP² | TAHA", bale: "@taha8797", rank: "-", role: "عضو عادی", code: "XPCEH7Z", activity: "100%" },
-    { realName: "رضا", gameName: "میگ میگ|EP³", bale: "@Reza_995", rank: "-", role: "عضو عادی", code: "HP74WZE", activity: "100%" },
-    { realName: "پویان", gameName: "PERSIA CYRUS EP³", bale: "@PC777", rank: "-", role: "عضو عادی", code: "UDEKSAA", activity: "100%" },
-    { realName: "شایان", gameName: "ایران شاه", bale: "@kkdddktkrrkfr", rank: "-", role: "عضو عادی", code: "ORW8Q9C6EK", activity: "100%" },
-    { realName: "امیر", gameName: "EP3 •AMIR.", bale: "@AMIR89236", rank: "-", role: "عضو عادی", code: "9AHP9YPZ1C", activity: "100%" }
-];
-var players = load('ep_players', defaultPlayers);
-var uid = function () { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
-players.forEach(function (p) { if (!p.id)
-    p.id = uid(); });
-var savePlayersToStorage = function () { return save('ep_players', players); };
-savePlayersToStorage();
-var byId = function (id) { return players.find(function (p) { return p.id === id; }); };
-var topIds = load('ep_top', []);
-while (topIds.length < 10)
-    topIds.push('');
-var TEAM_COLORS = ['45 212 191', '129 140 248', '244 114 182', '253 186 116'];
-var teams = load('ep_teams', null) || TEAM_COLORS.map(function (c, i) { return ({ name: 'تیم ' + (i + 1), m: ['', '', '', '', ''] }); });
-var B = load('ep_bracket', null);
-var archive = load('ep_archive', []);
-var saveArchive = function () { return save('ep_archive', archive); };
-/* ---------- Search ---------- */
-function filterPlayers() {
-    var q = $('searchInput').value.toLowerCase().trim();
-    var box = $('searchResults');
-    if (!q) {
-        box.innerHTML = '<div class="text-gray-400 text-center col-span-full py-2">نام یا آیدی بازیکن را برای جستجو وارد کنید...</div>';
-        return;
-    }
-    var f = players.filter(function (p) { return [p.realName, p.gameName, p.bale, p.phone || '', p.code].some(function (v) { return String(v).toLowerCase().includes(q); }); });
-    if (!f.length) {
-        box.innerHTML = '<div class="text-rose-300 text-center col-span-full py-2">بازیکنی با این مشخصات یافت نشد.</div>';
-        return;
-    }
-    box.innerHTML = f.map(function (p) { return "\n    <div class=\"card p-4 space-y-1 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\" style=\"--c:45 212 191\">\n      <div class=\"font-bold text-teal-300 text-base\">").concat(esc(p.gameName), "</div>\n      <div class=\"text-sm text-gray-300\">\u0646\u0627\u0645 \u0648\u0627\u0642\u0639\u06CC: <span class=\"text-white font-medium\">").concat(esc(p.realName), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: ").concat(esc(p.bale), "</div>\n      <div class=\"text-xs text-gray-400\">\u0634\u0645\u0627\u0631\u0647: <span dir=\"ltr\" class=\"inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div class=\"text-xs text-amber-300\">\u062F\u0631\u062C\u0647: ").concat(esc(p.rank), " | \u0646\u0642\u0634: ").concat(esc(p.role), "</div>\n      <div class=\"text-xs text-yellow-200 
+<script src="app.js?v=14" onerror="showErr('فایل app.js بارگذاری نشد. آن را کنار index.html در گیت‌هاب آپلود کن.')"></script>
+</body>
+</html>
