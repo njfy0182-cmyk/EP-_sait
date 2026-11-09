@@ -787,6 +787,76 @@ function addDefaultMembers() {
     alert(added + ' عضو اضافه شد' + (restored ? ' و ' + restored + ' عضو از آرشیو برگشت' : '') + (added + restored === 0 ? ' (همه اعضای اولیه از قبل در لیست بودند)' : '') + '.');
 }
 
+"use strict";
+/* ---------- Site gate (members only) ---------- */
+function h53(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < str.length; i++) {
+        var ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+var TEAM_HASH = 4153455446717171;
+var normCode = function (s) { return String(s == null ? '' : s).replace(/\s+/g, '').toLowerCase(); };
+var gateFails = 0, gateBlockUntil = 0;
+function gateOpen() { document.body.classList.remove('locked'); $('gate').style.display = 'none'; }
+function gateMsg(t) { $('gateMsg').textContent = t; }
+function gateLogin() {
+    if (Date.now() < gateBlockUntil) {
+        gateMsg('چند بار اشتباه زدی. چند ثانیه صبر کن و دوباره تلاش کن.');
+        return;
+    }
+    var code = normCode($('gateCode').value), team = $('gateTeam').value.trim();
+    var p = code && code !== '-' ? players.find(function (x) { return normCode(x.code) === code; }) : null;
+    if (!p || h53(team) !== TEAM_HASH) {
+        gateFails++;
+        if (gateFails >= 5) {
+            gateFails = 0;
+            gateBlockUntil = Date.now() + 30000;
+            gateMsg('چند بار اشتباه زدی. ۳۰ ثانیه صبر کن.');
+        }
+        else
+            gateMsg('کد بازی یا کد ورود تیم اشتباه است.');
+        return;
+    }
+    save('ep_session', p.id);
+    gateOpen();
+    renderWho();
+}
+function gateToggleAdmin() { $('gateAdminBox').classList.toggle('hidden'); }
+function gateAdminLogin() {
+    if ($('gateAdminPass').value !== ADMIN_PASS) {
+        gateMsg('رمز مدیر اشتباه است.');
+        return;
+    }
+    save('ep_session', '__admin__');
+    gateOpen();
+    grantAdmin();
+    renderWho();
+}
+function gateLogout() { save('ep_session', ''); location.reload(); }
+function renderWho() {
+    var sess = load('ep_session', ''), p = byId(sess), box = $('whoBox');
+    if (!box)
+        return;
+    var name = p ? esc(p.gameName) : (sess === '__admin__' ? 'مدیر' : '');
+    box.innerHTML = name ? '👋 خوش آمدی <b class="text-white">' + name + '</b> · <button onclick="gateLogout()" class="underline text-teal-300">خروج</button>' : '';
+}
+function gateCheck() {
+    var sess = load('ep_session', '');
+    var p = byId(sess);
+    if ((p && normCode(p.code) && normCode(p.code) !== '-') || sess === '__admin__')
+        gateOpen();
+    if (AUTH_URL)
+        $('gateAdminLink').style.display = 'none';
+}
+
+gateCheck();
+renderWho();
 initAuthUI();
 renderAll();
 showSec(['search', 'stats', 'tour', 'top', 'teams', 'analysis', 'archive', 'edu'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'search');
