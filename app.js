@@ -37,6 +37,8 @@ var defaultPlayers = [
     { realName: "امیر", gameName: "EP3 •AMIR.", bale: "@AMIR89236", rank: "-", role: "عضو عادی", code: "9AHP9YPZ1C", activity: "100%" }
 ];
 var players = load('ep_players', defaultPlayers);
+if (!players.length)
+    players = JSON.parse(JSON.stringify(defaultPlayers));
 var uid = function () { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
 players.forEach(function (p) { if (!p.id)
     p.id = uid(); });
@@ -204,11 +206,10 @@ function renderTeams() {
 /* ---------- Admin ---------- */
 var openAdminModal = function () { $('adminModal').classList.remove('hidden'); $('adminModal').classList.add('flex'); };
 var closeAdminModal = function () { $('adminModal').classList.add('hidden'); $('adminModal').classList.remove('flex'); };
-function verifyAdmin() {
-    if ($('adminPasswordInput').value !== ADMIN_PASS) {
-        alert('رمز عبور اشتباه است!');
-        return;
-    }
+// آدرس Worker تلگرام (بعد از دیپلوی اینجا بگذار). خالی باشد، ورود با رمز قدیمی انجام می‌شود.
+var AUTH_URL = '';
+var authTok = null;
+function grantAdmin() {
     isAdmin = true;
     document.body.classList.add('admin');
     $('adminLoginBox').classList.add('hidden');
@@ -216,6 +217,55 @@ function verifyAdmin() {
     renderAdminAll();
     renderBracket();
     renderArchive();
+    renderEdu();
+}
+function authMsg(t, bad) {
+    var m = $('authMsg');
+    m.textContent = t;
+    m.style.color = bad ? '#fda4af' : '#99f6e4';
+}
+function sendCode() {
+    var btn = $('sendCodeBtn');
+    btn.disabled = true;
+    authMsg('در حال ارسال کد...');
+    fetch(AUTH_URL + '/send', { method: 'POST' }).then(function (r) { return r.json(); }).then(function (d) {
+        btn.disabled = false;
+        if (!d.ok) { authMsg('ارسال کد ناموفق بود. تنظیمات Worker را چک کن.', true); return; }
+        authTok = { exp: d.exp, sig: d.sig };
+        authMsg('کد به تلگرام فرستاده شد. ۵ دقیقه اعتبار دارد.');
+        $('adminPasswordInput').focus();
+    }).catch(function () {
+        btn.disabled = false;
+        authMsg('اتصال به سرور برقرار نشد.', true);
+    });
+}
+function verifyAdmin() {
+    if (!AUTH_URL) {
+        if ($('adminPasswordInput').value !== ADMIN_PASS) {
+            alert('رمز عبور اشتباه است!');
+            return;
+        }
+        grantAdmin();
+        return;
+    }
+    if (!authTok) { authMsg('اول روی «ارسال کد به تلگرام» بزن.', true); return; }
+    fetch(AUTH_URL + '/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: $('adminPasswordInput').value.trim(), exp: authTok.exp, sig: authTok.sig })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.ok) { authTok = null; grantAdmin(); }
+        else authMsg('کد اشتباه یا منقضی شده است.', true);
+    }).catch(function () { authMsg('اتصال به سرور برقرار نشد.', true); });
+}
+function initAuthUI() {
+    if (!AUTH_URL) return;
+    $('sendCodeBtn').classList.remove('hidden');
+    var i = $('adminPasswordInput');
+    i.type = 'text';
+    i.setAttribute('inputmode', 'numeric');
+    i.setAttribute('autocomplete', 'one-time-code');
+    i.placeholder = 'کد ۸ رقمی تلگرام...';
 }
 function logoutAdmin() {
     isAdmin = false;
@@ -226,17 +276,20 @@ function logoutAdmin() {
     closeAdminModal();
     renderBracket();
     renderArchive();
+    renderEdu();
 }
 function showTab(n) {
-    ['players', 'top', 'tour', 'teams', 'score', 'stats', 'prof'].forEach(function (t) { return $('tab-' + t).classList.toggle('hidden', t !== n); });
+    ['players', 'top', 'tour', 'teams', 'score', 'stats', 'prof', 'edu'].forEach(function (t) { return $('tab-' + t).classList.toggle('hidden', t !== n); });
     document.querySelectorAll('.tab[data-tab]').forEach(function (b) { return b.classList.toggle('on', b.dataset.tab === n); });
     if (n === 'stats')
         renderAdminStats();
     if (n === 'prof')
         renderAdminProf();
+    if (n === 'edu')
+        renderAdminEdu();
 }
 var playerOpts = function (sel) { return '<option value="">— ' + (sel === 'top' ? 'خودکار' : 'خالی') + ' —</option>' + players.map(function (p) { return "<option value=\"".concat(p.id, "\">").concat(esc(p.gameName), " (").concat(esc(p.realName), ")</option>"); }).join(''); };
-function renderAdminAll() { renderAdminPlayersList(); renderAdminTop(); renderAdminTour(); renderAdminTeams(); renderAdminScore(); renderAdminStats(); renderAdminProf(); }
+function renderAdminAll() { renderAdminPlayersList(); renderAdminTop(); renderAdminTour(); renderAdminTeams(); renderAdminScore(); renderAdminStats(); renderAdminProf(); renderAdminEdu(); }
 function renderAdminPlayersList() {
     $('adminPlayersList').innerHTML = players.map(function (p, i) { return "\n    <div class=\"flex justify-between items-center bg-black/40 p-2 rounded-lg border border-teal-300/20 text-sm\">\n      <div><span class=\"font-bold text-white\">".concat(esc(p.gameName), "</span> <span class=\"text-xs text-gray-400\">(").concat(esc(p.realName), ")</span></div>\n      <div class=\"flex gap-2 items-center\">\n        <input type=\"number\" min=\"0\" max=\"20\" step=\"any\" title=\"\u0642\u062F\u0631\u062A \u0627\u0632 \u06F2\u06F0\" placeholder=\"\u0642\u062F\u0631\u062A\" value=\"").concat(typeof p.power === 'number' ? p.power : '', "\" onchange=\"setPower(").concat(i, ",this.value)\" class=\"inp !w-16 !py-1 text-center\">\n        <button onclick=\"editPlayer(").concat(i, ")\" class=\"bg-blue-600/50 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs\">\u0648\u06CC\u0631\u0627\u06CC\u0634</button>\n        <button onclick=\"deletePlayer(").concat(i, ")\" class=\"bg-rose-500/50 hover:bg-rose-500 text-white px-2 py-1 rounded text-xs\">\u062D\u0630\u0641</button>\n      </div>\n    </div>"); }).join('');
 }
@@ -610,12 +663,130 @@ function showSec(id) {
 }
 navLinks.forEach(function (a) { return a.addEventListener('click', function (e) { e.preventDefault(); showSec(a.getAttribute('href').slice(1)); }); });
 function renderAll() {
-    [filterPlayers, renderBracket, renderTopPlayers, renderTeams, renderAnalysis, renderStats, renderArchive].forEach(function (f) { try {
+    [filterPlayers, renderBracket, renderTopPlayers, renderTeams, renderAnalysis, renderStats, renderArchive, renderEdu].forEach(function (f) { try {
         f();
     }
     catch (e) {
         console.error(f.name, e);
     } });
 }
+"use strict";
+/* ---------- Education / tactics ---------- */
+var tactics = load('ep_tactics', []);
+var eduMin = Number(load('ep_edu_min', 18)) || 18;
+var eduPid = load('ep_edu', '');
+var eduArmy = '', eduEditId = '';
+var saveTactics = function () { return save('ep_tactics', tactics); };
+function avgScore(p) {
+    var v = weeks.map(function (w) { return w.scores[p.id]; }).filter(function (x) { return x !== undefined; });
+    return v.length ? v.reduce(function (t, x) { return t + x; }, 0) / v.length : null;
+}
+function eduTry() {
+    var q = $('eduInput').value.trim().toLowerCase(), msg = $('eduMsg');
+    var p = q && players.find(function (x) { return String(x.gameName).toLowerCase() === q || (x.code && x.code !== '-' && String(x.code).toLowerCase() === q); });
+    if (!p) {
+        msg.textContent = 'بازیکنی با این نام بازی یا کد پیدا نشد.';
+        return;
+    }
+    var a = avgScore(p);
+    if (a === null) {
+        msg.textContent = 'هنوز نمره‌ای برای تو ثبت نشده است.';
+        return;
+    }
+    if (a <= eduMin) {
+        msg.textContent = 'میانگین نمره تو ' + fa1(a) + ' است. برای باز شدن این بخش باید بیشتر از ' + fa(eduMin) + ' شود.';
+        return;
+    }
+    eduPid = p.id;
+    save('ep_edu', eduPid);
+    renderEdu();
+}
+function eduLock() { eduPid = ''; save('ep_edu', ''); renderEdu(); }
+function eduSetArmy(a) { eduArmy = a; renderEdu(); }
+function renderEdu() {
+    var box = $('eduBody'), p = byId(eduPid), a = p ? avgScore(p) : null;
+    var ok = isAdmin || (p && a !== null && a > eduMin);
+    if (!ok) {
+        box.innerHTML = "<div class=\"card p-6 text-center max-w-md mx-auto\" style=\"--c:251 146 60\">\n      <div class=\"text-5xl mb-3\">\uD83D\uDD12</div>\n      <div class=\"font-black text-white mb-1\">\u0628\u062E\u0634 \u0645\u062E\u0635\u0648\u0635 \u0627\u0639\u0636\u0627\u06CC \u0628\u0631\u062A\u0631</div>\n      <p class=\"text-sm text-gray-300 mb-4 leading-7\">\u0627\u06CC\u0646 \u0628\u062E\u0634 \u0628\u0631\u0627\u06CC \u0627\u0639\u0636\u0627\u06CC\u06CC \u0628\u0627\u0632 \u0645\u06CC\u200C\u0634\u0648\u062F \u06A9\u0647 \u0645\u06CC\u0627\u0646\u06AF\u06CC\u0646 \u0646\u0645\u0631\u0647\u200C\u0634\u0627\u0646 \u0628\u06CC\u0634\u062A\u0631 \u0627\u0632 <b class=\"text-orange-300\">".concat(fa(eduMin), "</b> \u0628\u0627\u0634\u062F.</p>\n      <input id=\"eduInput\" class=\"inp text-center mb-3\" placeholder=\"\u0646\u0627\u0645 \u0628\u0627\u0632\u06CC \u06CC\u0627 \u06A9\u062F \u0628\u0627\u0632\u06CC \u062E\u0648\u062F\u062A\" onkeydown=\"if(event.key==='Enter')eduTry()\" style=\"--c:251 146 60\">\n      <button onclick=\"eduTry()\" class=\"btn w-full\" style=\"--c:251 146 60\">\u0628\u0631\u0631\u0633\u06CC \u0648 \u0628\u0627\u0632 \u06A9\u0631\u062F\u0646</button>\n      <p id=\"eduMsg\" class=\"text-xs mt-3 text-rose-300 min-h-[1rem]\"></p></div>");
+        return;
+    }
+    var armies = [];
+    tactics.forEach(function (t) { if (armies.indexOf(t.army) < 0)
+        armies.push(t.army); });
+    if (eduArmy && armies.indexOf(eduArmy) < 0)
+        eduArmy = '';
+    var list = tactics.filter(function (t) { return !eduArmy || t.army === eduArmy; });
+    var chip = function (label, on, val) { return "<button onclick=\"eduSetArmy('".concat(val, "')\" class=\"nv ").concat(on ? 'on' : '', "\" style=\"--c:251 146 60\">").concat(label, "</button>"); };
+    box.innerHTML = "\n    <div class=\"flex items-center justify-between gap-2 mb-4 bg-black/25 rounded-xl p-3\">\n      <div class=\"text-sm text-gray-200\">".concat(p && a !== null && a > eduMin ? '🔓 سلام <b class="text-white">' + esc(p.gameName) + '</b> · میانگین تو: <b class="text-orange-300">' + fa1(a) + '</b>' : '🛡️ نمای مدیر', "</div>\n      ").concat(p ? '<button onclick="eduLock()" class="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300">قفل کردن</button>' : '', "\n    </div>\n    ").concat(armies.length ? "<div class=\"flex gap-2 overflow-x-auto pb-2 mb-3\">".concat(chip('همه', !eduArmy, '')).concat(armies.map(function (x) { return chip(esc(x), eduArmy === x, esc(x).replace(/'/g, '&#39;')); }).join(''), "</div>") : '', "\n    ").concat(list.length ? "<div class=\"space-y-3\">".concat(list.map(function (t) { return "\n      <div class=\"card p-4\" style=\"--c:251 146 60\">\n        <div class=\"flex items-center justify-between gap-2 mb-2\"><h3 class=\"font-black text-white\">".concat(esc(t.title), "</h3><span class=\"text-[11px] px-3 py-1 rounded-full bg-orange-400/15 text-orange-200 border border-orange-300/30 whitespace-nowrap\">\u2694\uFE0F ").concat(esc(t.army), "</span></div>\n        <div class=\"text-sm text-gray-200 leading-8\" style=\"white-space:pre-wrap\">").concat(esc(t.body), "</div>\n      </div>"); }).join(''), "</div>") : '<div class="card p-6 text-center text-gray-400" style="--c:251 146 60">هنوز تاکتیکی ثبت نشده است.</div>');
+}
+/* admin */
+function renderAdminEdu() {
+    var box = $('adminEduBody');
+    if (!box)
+        return;
+    var cur = tactics.find(function (t) { return t.id === eduEditId; }) || { army: '', title: '', body: '' };
+    var armies = [];
+    tactics.forEach(function (t) { if (armies.indexOf(t.army) < 0)
+        armies.push(t.army); });
+    var elig = players.filter(function (p) { var v = avgScore(p); return v !== null && v > eduMin; });
+    box.innerHTML = "\n    <label class=\"block text-xs text-gray-400\">\u062D\u062F\u0627\u0642\u0644 \u0645\u06CC\u0627\u0646\u06AF\u06CC\u0646 \u0628\u0631\u0627\u06CC \u0628\u0627\u0632 \u0634\u062F\u0646 (\u0628\u06CC\u0634\u062A\u0631 \u0627\u0632)\n      <input type=\"number\" step=\"any\" class=\"inp mt-1 text-center\" value=\"".concat(eduMin, "\" onchange=\"setEduMin(this.value)\"></label>\n    <div class=\"text-xs text-gray-400\">\u0627\u0639\u0636\u0627\u06CC \u0648\u0627\u062C\u062F \u0634\u0631\u0627\u06CC\u0637 (").concat(fa(elig.length), "): <span class=\"text-orange-200\">").concat(elig.length ? elig.map(function (p) { return esc(p.gameName); }).join('، ') : 'هنوز کسی نیست', "</span></div>\n    <div class=\"space-y-2 bg-black/30 p-4 rounded-xl border border-orange-300/25\">\n      <h4 class=\"font-bold text-sm text-orange-300\">").concat(eduEditId ? 'ویرایش تاکتیک' : 'افزودن تاکتیک جدید', "</h4>\n      <input id=\"edArmy\" list=\"armyList\" class=\"inp\" placeholder=\"\u0628\u0631\u0627\u06CC \u06A9\u062F\u0627\u0645 \u0627\u0631\u062A\u0634\u061F\" value=\"").concat(esc(cur.army), "\">\n      <datalist id=\"armyList\">").concat(armies.map(function (x) { return '<option value="' + esc(x) + '">'; }).join(''), "</datalist>\n      <input id=\"edTitle\" class=\"inp\" placeholder=\"\u0639\u0646\u0648\u0627\u0646 \u062A\u0627\u06A9\u062A\u06CC\u06A9\" value=\"").concat(esc(cur.title), "\">\n      <textarea id=\"edBody\" rows=\"6\" class=\"inp\" placeholder=\"\u0645\u062A\u0646 \u062A\u0627\u06A9\u062A\u06CC\u06A9 \u0631\u0627 \u0628\u0646\u0648\u06CC\u0633...\">").concat(esc(cur.body), "</textarea>\n      <div class=\"flex gap-2\"><button onclick=\"eduSave()\" class=\"btn flex-1\">\u0630\u062E\u06CC\u0631\u0647 \u062A\u0627\u06A9\u062A\u06CC\u06A9</button>").concat(eduEditId ? '<button onclick="eduEditId=&#39;&#39;;renderAdminEdu()" class="bg-gray-700 text-white px-3 rounded-lg text-sm">لغو</button>' : '', "</div>\n    </div>\n    <div class=\"space-y-2\">").concat(tactics.map(function (t) { return "<div class=\"flex items-center justify-between gap-2 bg-black/30 p-2 rounded-lg border border-orange-300/15 text-sm\">\n      <div class=\"min-w-0\"><div class=\"font-bold text-white truncate\">".concat(esc(t.title), "</div><div class=\"text-xs text-orange-200\">\u2694\uFE0F ").concat(esc(t.army), "</div></div>\n      <div class=\"flex gap-2 shrink-0\"><button onclick=\"eduEdit('").concat(t.id, "')\" class=\"bg-blue-600/50 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs\">\u0648\u06CC\u0631\u0627\u06CC\u0634</button><button onclick=\"eduDel('").concat(t.id, "')\" class=\"bg-rose-600/50 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs\">\u062D\u0630\u0641</button></div></div>"); }).join('') || '<div class="text-sm text-gray-500 text-center py-2">هنوز تاکتیکی ثبت نشده.</div>', "</div>");
+}
+function setEduMin(v) { eduMin = Number(v) || 18; save('ep_edu_min', eduMin); renderAdminEdu(); renderEdu(); }
+function eduSave() {
+    var army = $('edArmy').value.trim(), title = $('edTitle').value.trim(), body = $('edBody').value.trim();
+    if (!army || !title || !body) {
+        alert('ارتش، عنوان و متن تاکتیک را کامل بنویس.');
+        return;
+    }
+    if (eduEditId) {
+        var t = tactics.find(function (x) { return x.id === eduEditId; });
+        if (t) {
+            t.army = army;
+            t.title = title;
+            t.body = body;
+        }
+    }
+    else
+        tactics.push({ id: uid(), army: army, title: title, body: body });
+    eduEditId = '';
+    saveTactics();
+    renderAdminEdu();
+    renderEdu();
+}
+function eduEdit(id) { eduEditId = id; renderAdminEdu(); }
+function eduDel(id) {
+    if (!confirm('این تاکتیک حذف شود؟'))
+        return;
+    tactics = tactics.filter(function (t) { return t.id !== id; });
+    if (eduEditId === id)
+        eduEditId = '';
+    saveTactics();
+    renderAdminEdu();
+    renderEdu();
+}
+
+function addDefaultMembers() {
+    var added = 0, restored = 0;
+    defaultPlayers.forEach(function (d) {
+        if (players.some(function (p) { return p.gameName === d.gameName; }))
+            return;
+        var arch = archive.filter(function (p) { return p.gameName === d.gameName; })[0];
+        if (arch) {
+            restoreArchived(arch.id);
+            restored++;
+            return;
+        }
+        var c = JSON.parse(JSON.stringify(d));
+        c.id = uid();
+        players.push(c);
+        added++;
+    });
+    savePlayersToStorage();
+    renderAll();
+    renderAdminAll();
+    alert(added + ' عضو اضافه شد' + (restored ? ' و ' + restored + ' عضو از آرشیو برگشت' : '') + (added + restored === 0 ? ' (همه اعضای اولیه از قبل در لیست بودند)' : '') + '.');
+}
+
+initAuthUI();
 renderAll();
-showSec(['search', 'stats', 'tour', 'top', 'teams', 'analysis', 'archive'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'search');
+showSec(['search', 'stats', 'tour', 'top', 'teams', 'analysis', 'archive', 'edu'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'search');
