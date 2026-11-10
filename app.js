@@ -42,7 +42,7 @@ if (!players.length)
 var uid = function () { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
 players.forEach(function (p) { if (!p.id)
     p.id = uid(); });
-var savePlayersToStorage = function () { return save('ep_players', players); };
+var savePlayersToStorage = function () { save('ep_players', players); schedSync(); };
 savePlayersToStorage();
 var byId = function (id) { return players.find(function (p) { return p.id === id; }); };
 var topIds = load('ep_top', []);
@@ -66,7 +66,7 @@ function filterPlayers() {
         box.innerHTML = '<div class="text-rose-300 text-center col-span-full py-2">بازیکنی با این مشخصات یافت نشد.</div>';
         return;
     }
-    box.innerHTML = f.map(function (p) { return "\n    <div class=\"card p-4 space-y-1 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\" style=\"--c:45 212 191\">\n      <div class=\"font-bold text-teal-300 text-base\">").concat(esc(p.gameName), "</div>\n      <div class=\"text-sm text-gray-300\">\u0646\u0627\u0645 \u0648\u0627\u0642\u0639\u06CC: <span class=\"text-white font-medium\">").concat(esc(p.realName), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: ").concat(esc(p.bale), "</div>\n      <div class=\"text-xs text-gray-400\">\u0634\u0645\u0627\u0631\u0647: <span dir=\"ltr\" class=\"inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div class=\"text-xs text-amber-300\">\u062F\u0631\u062C\u0647: ").concat(esc(p.rank), " | \u0646\u0642\u0634: ").concat(esc(p.role), "</div>\n      <div class=\"text-xs text-yellow-200 font-mono\">\u06A9\u062F: ").concat(esc(p.code), "</div>\n      <div class=\"text-xs text-green-400 font-bold\">\u0641\u0639\u0627\u0644\u06CC\u062A: ").concat(esc(p.activity), "</div>\n    </div>"); }).join('');
+    box.innerHTML = f.map(function (p) { return "\n    <div class=\"card p-4 space-y-1 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\" style=\"--c:45 212 191\">\n      <div class=\"font-bold text-teal-300 text-base\">").concat(nm(p), "</div>\n      <div class=\"text-sm text-gray-300\">\u0646\u0627\u0645 \u0648\u0627\u0642\u0639\u06CC: <span class=\"text-white font-medium\">").concat(esc(p.realName), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: ").concat(esc(p.bale), "</div>\n      <div class=\"text-xs text-gray-400\">\u0634\u0645\u0627\u0631\u0647: <span dir=\"ltr\" class=\"inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div class=\"text-xs text-amber-300\">\u062F\u0631\u062C\u0647: ").concat(esc(p.rank), " | \u0646\u0642\u0634: ").concat(esc(p.role), "</div>\n      <div class=\"text-xs text-yellow-200 font-mono\">\u06A9\u062F: ").concat(esc(p.code), "</div>\n      <div class=\"text-xs text-green-400 font-bold\">\u0641\u0639\u0627\u0644\u06CC\u062A: ").concat(esc(p.activity), "</div>\n    </div>"); }).join('');
 }
 /* ---------- Tournament bracket ---------- */
 function genBracket() {
@@ -192,15 +192,15 @@ function resolveTop() {
 function renderTopPlayers() {
     var medals = ['🥇', '🥈', '🥉'], ring = ['250 204 21', '203 213 225', '217 119 6'];
     var list = resolveTop();
-    var podium = list.slice(0, 3).map(function (p, i) { return "\n    <div class=\"card p-5 text-center cursor-pointer ".concat(i === 0 ? 'md:scale-105 shadow-lg shadow-yellow-500/10' : '', "\" onclick=\"openProfile('").concat(p.id, "')\" style=\"--c:").concat(ring[i], "\">\n      <div class=\"text-4xl mb-1\">").concat(medals[i], "</div>\n      <div class=\"font-black text-white text-lg\">").concat(esc(p.gameName), "</div>\n      <div class=\"text-xs text-gray-300 mt-1\">").concat(esc(p.realName), " \u00B7 ").concat(esc(p.role), "</div>\n      <div class=\"text-xs mt-2 font-bold\" style=\"color:rgb(").concat(ring[i], ")\">\u0641\u0639\u0627\u0644\u06CC\u062A: ").concat(esc(p.activity), "</div>\n    </div>"); }).join('');
-    var rest = list.slice(3).map(function (p, i) { return "\n    <div class=\"card p-3 flex items-center gap-3 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\" style=\"--c:250 204 21\">\n      <span class=\"w-8 h-8 rounded-full bg-yellow-400/20 text-yellow-300 font-black flex items-center justify-center text-sm\">").concat(i + 4, "</span>\n      <div class=\"min-w-0\"><div class=\"font-bold text-white truncate\">").concat(esc(p.gameName), "</div><div class=\"text-xs text-gray-400\">").concat(esc(p.realName), " \u00B7 ").concat(esc(p.role), "</div></div>\n      <span class=\"mr-auto text-xs font-bold text-yellow-300\">").concat(esc(p.activity), "</span>\n    </div>"); }).join('');
+    var podium = list.slice(0, 3).map(function (p, i) { return "\n    <div class=\"card p-5 text-center cursor-pointer ".concat(i === 0 ? 'md:scale-105 shadow-lg shadow-yellow-500/10' : '', "\" onclick=\"openProfile('").concat(p.id, "')\" style=\"--c:").concat(ring[i], "\">\n      <div class=\"text-4xl mb-1\">").concat(medals[i], "</div>\n      <div class=\"font-black text-white text-lg\">").concat(nm(p), "</div>\n      <div class=\"text-xs text-gray-300 mt-1\">").concat(esc(p.realName), " \u00B7 ").concat(esc(p.role), "</div>\n      <div class=\"text-xs mt-2 font-bold\" style=\"color:rgb(").concat(ring[i], ")\">\u0641\u0639\u0627\u0644\u06CC\u062A: ").concat(esc(p.activity), "</div>\n    </div>"); }).join('');
+    var rest = list.slice(3).map(function (p, i) { return "\n    <div class=\"card p-3 flex items-center gap-3 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\" style=\"--c:250 204 21\">\n      <span class=\"w-8 h-8 rounded-full bg-yellow-400/20 text-yellow-300 font-black flex items-center justify-center text-sm\">").concat(i + 4, "</span>\n      <div class=\"min-w-0\"><div class=\"font-bold text-white truncate\">").concat(nm(p), "</div><div class=\"text-xs text-gray-400\">").concat(esc(p.realName), " \u00B7 ").concat(esc(p.role), "</div></div>\n      <span class=\"mr-auto text-xs font-bold text-yellow-300\">").concat(esc(p.activity), "</span>\n    </div>"); }).join('');
     $('topPlayersList').innerHTML = "<div class=\"grid grid-cols-1 md:grid-cols-3 gap-4 mb-4\">".concat(podium, "</div><div class=\"grid grid-cols-1 md:grid-cols-2 gap-3\">").concat(rest, "</div>");
 }
 /* ---------- Teams ---------- */
 function renderTeams() {
     $('teamsList').innerHTML = teams.map(function (t, i) { return "\n    <div class=\"card p-4\" style=\"--c:".concat(TEAM_COLORS[i], "\">\n      <div class=\"flex items-center justify-between mb-3 pb-2 border-b\" style=\"border-color:rgb(").concat(TEAM_COLORS[i], "/.35)\">\n        <h3 class=\"font-black text-lg\" style=\"color:rgb(").concat(TEAM_COLORS[i], ")\">").concat(esc(t.name), "</h3>\n        <span class=\"text-xs text-gray-400\">").concat(t.m.filter(Boolean).length, " \u0627\u0632 \u06F5</span>\n      </div>\n      <ul class=\"space-y-1.5\">").concat(t.m.map(function (id, s) {
         var p = byId(id);
-        return "\n        <li ".concat(p ? "onclick=\"openProfile('".concat(p.id, "')\"") : '', " class=\"flex items-center gap-2 text-sm bg-black/30 rounded-lg px-3 py-1.5 ").concat(p ? 'cursor-pointer hover:bg-black/50' : '', "\">\n          <span class=\"w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center\" style=\"background:rgb(").concat(TEAM_COLORS[i], ");color:#04121a\">").concat(s + 1, "</span>\n          ").concat(p ? "<span class=\"font-bold text-white\">".concat(esc(p.gameName), "</span><span class=\"text-xs text-gray-400 mr-auto\">").concat(esc(p.realName), "</span>") : '<span class="text-gray-500">جای خالی</span>', "\n        </li>");
+        return "\n        <li ".concat(p ? "onclick=\"openProfile('".concat(p.id, "')\"") : '', " class=\"flex items-center gap-2 text-sm bg-black/30 rounded-lg px-3 py-1.5 ").concat(p ? 'cursor-pointer hover:bg-black/50' : '', "\">\n          <span class=\"w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center\" style=\"background:rgb(").concat(TEAM_COLORS[i], ");color:#04121a\">").concat(s + 1, "</span>\n          ").concat(p ? "<span class=\"font-bold text-white\">".concat(nm(p), "</span><span class=\"text-xs text-gray-400 mr-auto\">").concat(esc(p.realName), "</span>") : '<span class="text-gray-500">جای خالی</span>', "\n        </li>");
     }).join(''), "</ul>\n    </div>"); }).join('');
 }
 /* ---------- Admin ---------- */
@@ -218,6 +218,7 @@ function grantAdmin() {
     renderBracket();
     renderArchive();
     renderEdu();
+    syncNow(true);
 }
 function authMsg(t, bad) {
     var m = $('authMsg');
@@ -245,6 +246,7 @@ function verifyAdmin() {
             alert('رمز عبور اشتباه است!');
             return;
         }
+        adminPassMem = $('adminPasswordInput').value;
         grantAdmin();
         return;
     }
@@ -279,7 +281,7 @@ function logoutAdmin() {
     renderEdu();
 }
 function showTab(n) {
-    ['players', 'top', 'tour', 'teams', 'score', 'stats', 'prof', 'edu'].forEach(function (t) { return $('tab-' + t).classList.toggle('hidden', t !== n); });
+    ['players', 'top', 'tour', 'teams', 'score', 'stats', 'prof', 'edu', 'log'].forEach(function (t) { return $('tab-' + t).classList.toggle('hidden', t !== n); });
     document.querySelectorAll('.tab[data-tab]').forEach(function (b) { return b.classList.toggle('on', b.dataset.tab === n); });
     if (n === 'stats')
         renderAdminStats();
@@ -287,6 +289,11 @@ function showTab(n) {
         renderAdminProf();
     if (n === 'edu')
         renderAdminEdu();
+    if (n === 'log')
+        renderAdminLog();
+    var ac = $('adminContent');
+    if (ac)
+        ac.scrollTop = 0;
 }
 var playerOpts = function (sel) { return '<option value="">— ' + (sel === 'top' ? 'خودکار' : 'خالی') + ' —</option>' + players.map(function (p) { return "<option value=\"".concat(p.id, "\">").concat(esc(p.gameName), " (").concat(esc(p.realName), ")</option>"); }).join(''); };
 function renderAdminAll() { renderAdminPlayersList(); renderAdminTop(); renderAdminTour(); renderAdminTeams(); renderAdminScore(); renderAdminStats(); renderAdminProf(); renderAdminEdu(); }
@@ -400,7 +407,7 @@ function renderArchive() {
         box.innerHTML = "<div class=\"card p-6 text-center text-gray-400 col-span-full\" style=\"--c:148 163 184\">".concat(archive.length ? 'موردی پیدا نشد.' : 'آرشیو خالی است. بازیکنی که از پنل مدیریت حذف شود اینجا نگهداری می‌شود.', "</div>");
         return;
     }
-    box.innerHTML = list.map(function (p) { return "\n    <div class=\"card p-4 space-y-1 cursor-pointer\" style=\"--c:148 163 184\" onclick=\"openProfile('".concat(p.id, "')\">\n      <div class=\"flex items-center justify-between gap-2\"><div class=\"font-bold text-slate-200 text-base truncate\">").concat(esc(p.gameName), "</div><span class=\"text-[11px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300 whitespace-nowrap\">\u062E\u0631\u0648\u062C: ").concat(esc(p.leftAt || '—'), "</span></div>\n      <div class=\"text-sm text-gray-300\">\u0646\u0627\u0645 \u0648\u0627\u0642\u0639\u06CC: <span class=\"text-white\">").concat(esc(p.realName), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: ").concat(esc(p.bale), " &nbsp;|&nbsp; \u0634\u0645\u0627\u0631\u0647: <span dir=\"ltr\" class=\"inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0646\u0642\u0634: ").concat(esc(p.role), " &nbsp;|&nbsp; \u06A9\u062F: <span class=\"font-mono\">").concat(esc(p.code), "</span></div>\n      ").concat(p.reason ? "<div class=\"text-xs text-rose-300 bg-rose-500/10 rounded-lg px-2 py-1 mt-1\">\u062F\u0644\u06CC\u0644 \u062E\u0631\u0648\u062C: ".concat(esc(p.reason), "</div>") : '', "\n      ").concat(isAdmin ? "<div class=\"flex gap-2 pt-2\" onclick=\"event.stopPropagation()\"><button onclick=\"restoreArchived('".concat(p.id, "')\" class=\"flex-1 bg-emerald-600/50 hover:bg-emerald-600 text-white py-1.5 rounded-lg text-xs font-bold\">\u21BA \u0628\u0627\u0632\u06AF\u0631\u062F\u0627\u0646\u06CC</button><button onclick=\"purgeArchived('").concat(p.id, "')\" class=\"bg-rose-600/50 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs\">\u062D\u0630\u0641 \u062F\u0627\u0626\u0645\u06CC</button></div>") : '', "\n    </div>"); }).join('');
+    box.innerHTML = list.map(function (p) { return "\n    <div class=\"card p-4 space-y-1 cursor-pointer\" style=\"--c:148 163 184\" onclick=\"openProfile('".concat(p.id, "')\">\n      <div class=\"flex items-center justify-between gap-2\"><div class=\"font-bold text-slate-200 text-base truncate\">").concat(nm(p), "</div><span class=\"text-[11px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300 whitespace-nowrap\">\u062E\u0631\u0648\u062C: ").concat(esc(p.leftAt || '—'), "</span></div>\n      <div class=\"text-sm text-gray-300\">\u0646\u0627\u0645 \u0648\u0627\u0642\u0639\u06CC: <span class=\"text-white\">").concat(esc(p.realName), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: ").concat(esc(p.bale), " &nbsp;|&nbsp; \u0634\u0645\u0627\u0631\u0647: <span dir=\"ltr\" class=\"inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div class=\"text-xs text-gray-400\">\u0646\u0642\u0634: ").concat(esc(p.role), " &nbsp;|&nbsp; \u06A9\u062F: <span class=\"font-mono\">").concat(esc(p.code), "</span></div>\n      ").concat(p.reason ? "<div class=\"text-xs text-rose-300 bg-rose-500/10 rounded-lg px-2 py-1 mt-1\">\u062F\u0644\u06CC\u0644 \u062E\u0631\u0648\u062C: ".concat(esc(p.reason), "</div>") : '', "\n      ").concat(isAdmin ? "<div class=\"flex gap-2 pt-2\" onclick=\"event.stopPropagation()\"><button onclick=\"restoreArchived('".concat(p.id, "')\" class=\"flex-1 bg-emerald-600/50 hover:bg-emerald-600 text-white py-1.5 rounded-lg text-xs font-bold\">\u21BA \u0628\u0627\u0632\u06AF\u0631\u062F\u0627\u0646\u06CC</button><button onclick=\"purgeArchived('").concat(p.id, "')\" class=\"bg-rose-600/50 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs\">\u062D\u0630\u0641 \u062F\u0627\u0626\u0645\u06CC</button></div>") : '', "\n    </div>"); }).join('');
 }
 function resetForm() {
     $('editIndex').value = -1;
@@ -427,7 +434,7 @@ function openProfile(id) {
     var chip = function (t, c) { return "<span class=\"text-xs px-3 py-1 rounded-full border\" style=\"color:rgb(".concat(c, ");border-color:rgb(").concat(c, "/.4);background:rgb(").concat(c, "/.1)\">").concat(t, "</span>"); };
     var box = function (v, l) { return "<div class=\"bg-black/30 border border-white/10 rounded-xl p-3 text-center\"><div class=\"font-black text-white text-lg\">".concat(v, "</div><div class=\"text-[11px] text-gray-400\">").concat(l, "</div></div>"); };
     var g = (p.wins || 0) + (p.losses || 0);
-    $('profileBody').innerHTML = "\n    <button onclick=\"closeProfile()\" class=\"absolute top-4 left-4 text-gray-400 hover:text-white text-lg\">\u2715</button>\n    <div class=\"flex items-center gap-4 mb-4\">\n      <div class=\"w-20 h-20 shrink-0 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-lg\" style=\"background:linear-gradient(135deg,#1f9e8f,#6d6fd0 60%,#e9b98f)\">".concat(esc(letter), "</div>\n      <div class=\"min-w-0\"><h3 class=\"text-xl font-black text-white truncate\">").concat(esc(p.gameName), "</h3><div class=\"text-sm text-gray-300\">").concat(esc(p.realName), "</div>").concat(p.joinDate ? "<div class=\"text-xs text-gray-500 mt-1\">\u0639\u0636\u0648 \u0627\u0632 ".concat(esc(p.joinDate), "</div>") : '', "</div>\n    </div>\n    <div class=\"flex flex-wrap gap-2 mb-4\">\n      ").concat(gone ? chip('🗃️ خارج‌شده از کلن' + (p.leftAt ? ' · ' + esc(p.leftAt) : ''), '148 163 184') : '', "\n      ").concat(chip(p.type === 'new' ? '✦ عضو جدید' : '👑 عضو قدیمی', p.type === 'new' ? '244 114 182' : '253 186 116'), "\n      ").concat(chip(isActiveP(p) ? '◉ فعال' : '○ کم‌فعال', isActiveP(p) ? '52 211 153' : '56 189 248'), "\n      ").concat(p.role && p.role !== '-' ? chip(esc(p.role), '129 140 248') : '', "\n      ").concat(p.rank && p.rank !== '-' ? chip('رنک: ' + esc(p.rank), '252 211 77') : '', "\n      ").concat(ti >= 0 ? chip('🛡️ ' + esc(teams[ti].name), TEAM_COLORS[ti]) : '', "\n      ").concat(top >= 0 ? chip('🏆 جایگاه ' + fa(top + 1) + ' نفرات برتر', '250 204 21') : '', "\n    </div>\n    ").concat(p.bio ? "<p class=\"text-sm text-gray-200 leading-7 bg-black/25 rounded-xl p-3 mb-4\">".concat(esc(p.bio), "</p>") : '', "\n    ").concat((p.badges || []).length ? "<div class=\"flex flex-wrap gap-2 mb-4\">".concat(p.badges.map(function (b) { return "<span class=\"text-xs px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-300/30 text-amber-200\">".concat(esc(b), "</span>"); }).join(''), "</div>") : '', "\n    <div class=\"grid grid-cols-3 gap-2 mb-4\">\n      ").concat(box(typeof p.power === 'number' ? fa(p.power) + '/۲۰' : '—', 'قدرت'), "\n      ").concat(box(esc(p.activity), 'فعالیت'), "\n      ").concat(box(lastScore === null ? '—' : fa(lastScore), 'آخرین نمره'), "\n      ").concat(box(fa(p.wins || 0), 'برد'), "\n      ").concat(box(fa(p.losses || 0), 'باخت'), "\n      ").concat(box(fa(p.titles || 0), 'قهرمانی'), "\n    </div>\n    ").concat(typeof p.power === 'number' ? "<div class=\"pbar mb-4\"><div class=\"pfill\" style=\"width:".concat(p.power / 20 * 100, "%\"></div></div>") : '', "\n    ").concat(g ? "<div class=\"text-xs text-gray-400 mb-4\">\u062F\u0631\u0635\u062F \u0628\u0631\u062F: <b class=\"text-white\">".concat(fa(Math.round((p.wins || 0) / g * 100)), "\u066A</b>").concat(prevScore !== undefined && lastScore !== null ? ' &nbsp;|&nbsp; تغییر نمره هفته آخر: ' + badge(lastScore - prevScore) : '', "</div>") : (prevScore !== undefined && lastScore !== null ? "<div class=\"text-xs text-gray-400 mb-4\">\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0645\u0631\u0647 \u0647\u0641\u062A\u0647 \u0622\u062E\u0631: ".concat(badge(lastScore - prevScore), "</div>") : ''), "\n    ").concat(hasW ? "<div class=\"card p-3 mb-3\" style=\"--c:52 211 153\"><div class=\"text-sm font-bold text-white mb-1\">\u0631\u0648\u0646\u062F \u0646\u0645\u0631\u0647</div>".concat(lineChart('scores', id, '#34d399'), "</div>") : '', "\n    ").concat(hasC ? "<div class=\"card p-3 mb-3\" style=\"--c:165 180 252\"><div class=\"text-sm font-bold text-white mb-1\">\u0631\u0648\u0646\u062F \u062A\u0639\u062F\u0627\u062F \u0686\u062A</div>".concat(lineChart('chats', id, '#a5b4fc'), "</div>") : '', "\n    <div class=\"text-xs text-gray-400 space-y-1 bg-black/25 rounded-xl p-3\">\n      <div>\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: <span class=\"text-white\">").concat(esc(p.bale), "</span></div>\n      <div>\u0634\u0645\u0627\u0631\u0647 \u062A\u0645\u0627\u0633: <span dir=\"ltr\" class=\"text-white font-mono inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div>\u06A9\u062F \u0628\u0627\u0632\u06CC: <span class=\"text-white font-mono\">").concat(esc(p.code), "</span></div>\n    </div>\n    ").concat(isAdmin && !gone ? "<button onclick=\"editProfileFromModal('".concat(id, "')\" class=\"btn w-full mt-4\">\u270E \u0648\u06CC\u0631\u0627\u06CC\u0634 \u067E\u0631\u0648\u0641\u0627\u06CC\u0644</button>") : '');
+    $('profileBody').innerHTML = "\n    <button onclick=\"closeProfile()\" class=\"absolute top-4 left-4 text-gray-400 hover:text-white text-lg\">\u2715</button>\n    <div class=\"flex items-center gap-4 mb-4\">\n      <div class=\"w-20 h-20 shrink-0 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-lg\" style=\"background:linear-gradient(135deg,#1f9e8f,#6d6fd0 60%,#e9b98f)\">".concat(esc(letter), "</div>\n      <div class=\"min-w-0\"><h3 class=\"text-xl font-black text-white truncate\">").concat(nm(p), "</h3><div class=\"text-sm text-gray-300\">").concat(esc(p.realName), "</div>").concat(p.joinDate ? "<div class=\"text-xs text-gray-500 mt-1\">\u0639\u0636\u0648 \u0627\u0632 ".concat(esc(p.joinDate), "</div>") : '', "</div>\n    </div>\n    <div class=\"flex flex-wrap gap-2 mb-4\">\n      ").concat(p.admin ? chip('👑 ادمین تیم', '250 204 21') + ' ' : '').concat(gone ? chip('🗃️ خارج‌شده از کلن' + (p.leftAt ? ' · ' + esc(p.leftAt) : ''), '148 163 184') : '', "\n      ").concat(chip(p.type === 'new' ? '✦ عضو جدید' : '👑 عضو قدیمی', p.type === 'new' ? '244 114 182' : '253 186 116'), "\n      ").concat(chip(isActiveP(p) ? '◉ فعال' : '○ کم‌فعال', isActiveP(p) ? '52 211 153' : '56 189 248'), "\n      ").concat(p.role && p.role !== '-' ? chip(esc(p.role), '129 140 248') : '', "\n      ").concat(p.rank && p.rank !== '-' ? chip('رنک: ' + esc(p.rank), '252 211 77') : '', "\n      ").concat(ti >= 0 ? chip('🛡️ ' + esc(teams[ti].name), TEAM_COLORS[ti]) : '', "\n      ").concat(top >= 0 ? chip('🏆 جایگاه ' + fa(top + 1) + ' نفرات برتر', '250 204 21') : '', "\n    </div>\n    ").concat(p.bio ? "<p class=\"text-sm text-gray-200 leading-7 bg-black/25 rounded-xl p-3 mb-4\">".concat(esc(p.bio), "</p>") : '', "\n    ").concat((p.badges || []).length ? "<div class=\"flex flex-wrap gap-2 mb-4\">".concat(p.badges.map(function (b) { return "<span class=\"text-xs px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-300/30 text-amber-200\">".concat(esc(b), "</span>"); }).join(''), "</div>") : '', "\n    <div class=\"grid grid-cols-3 gap-2 mb-4\">\n      ").concat(box(typeof p.power === 'number' ? fa(p.power) + '/۲۰' : '—', 'قدرت'), "\n      ").concat(box(esc(p.activity), 'فعالیت'), "\n      ").concat(box(lastScore === null ? '—' : fa(lastScore), 'آخرین نمره'), "\n      ").concat(box(fa(p.wins || 0), 'برد'), "\n      ").concat(box(fa(p.losses || 0), 'باخت'), "\n      ").concat(box(fa(p.titles || 0), 'قهرمانی'), "\n    </div>\n    ").concat(typeof p.power === 'number' ? "<div class=\"pbar mb-4\"><div class=\"pfill\" style=\"width:".concat(p.power / 20 * 100, "%\"></div></div>") : '', "\n    ").concat(g ? "<div class=\"text-xs text-gray-400 mb-4\">\u062F\u0631\u0635\u062F \u0628\u0631\u062F: <b class=\"text-white\">".concat(fa(Math.round((p.wins || 0) / g * 100)), "\u066A</b>").concat(prevScore !== undefined && lastScore !== null ? ' &nbsp;|&nbsp; تغییر نمره هفته آخر: ' + badge(lastScore - prevScore) : '', "</div>") : (prevScore !== undefined && lastScore !== null ? "<div class=\"text-xs text-gray-400 mb-4\">\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0645\u0631\u0647 \u0647\u0641\u062A\u0647 \u0622\u062E\u0631: ".concat(badge(lastScore - prevScore), "</div>") : ''), "\n    ").concat(hasW ? "<div class=\"card p-3 mb-3\" style=\"--c:52 211 153\"><div class=\"text-sm font-bold text-white mb-1\">\u0631\u0648\u0646\u062F \u0646\u0645\u0631\u0647</div>".concat(lineChart('scores', id, '#34d399'), "</div>") : '', "\n    ").concat(hasC ? "<div class=\"card p-3 mb-3\" style=\"--c:165 180 252\"><div class=\"text-sm font-bold text-white mb-1\">\u0631\u0648\u0646\u062F \u062A\u0639\u062F\u0627\u062F \u0686\u062A</div>".concat(lineChart('chats', id, '#a5b4fc'), "</div>") : '', "\n    <div class=\"text-xs text-gray-400 space-y-1 bg-black/25 rounded-xl p-3\">\n      <div>\u0622\u06CC\u062F\u06CC \u0628\u0644\u0647: <span class=\"text-white\">").concat(esc(p.bale), "</span></div>\n      <div>\u0634\u0645\u0627\u0631\u0647 \u062A\u0645\u0627\u0633: <span dir=\"ltr\" class=\"text-white font-mono inline-block\">").concat(esc(p.phone || '-'), "</span></div>\n      <div>\u06A9\u062F \u0628\u0627\u0632\u06CC: <span class=\"text-white font-mono\">").concat(esc(p.code), "</span></div>\n    </div>\n    ").concat(isAdmin && !gone ? "<button onclick=\"editProfileFromModal('".concat(id, "')\" class=\"btn w-full mt-4\">\u270E \u0648\u06CC\u0631\u0627\u06CC\u0634 \u067E\u0631\u0648\u0641\u0627\u06CC\u0644</button>") : '');
     $('profileModal').classList.remove('hidden');
     $('profileModal').classList.add('flex');
 }
@@ -518,7 +525,7 @@ function renderStats() {
     var card = function (ico, val, label, c, hl) { return "<div class=\"card p-4 flex flex-col gap-2 min-h-[130px] justify-between ".concat(hl ? 'shadow-lg shadow-amber-400/10' : '', "\" style=\"--c:").concat(c, "\"><span class=\"text-xl\" style=\"color:rgb(").concat(c, ")\">").concat(ico, "</span><div><div class=\"text-4xl font-black ").concat(hl ? 'text-amber-300' : 'text-white', "\">").concat(val, "</div><div class=\"text-sm text-gray-300 mt-1\">").concat(label, "</div></div></div>"); };
     var ranked = __spreadArray([], withP, true).sort(function (a, b) { return b.power - a.power; });
     var shown = statsAll ? ranked : ranked.slice(0, 5);
-    $('statsBody').innerHTML = "\n    <div class=\"card p-5 mb-4\" style=\"--c:252 211 77\">\n      <div class=\"flex items-center justify-between mb-4\">\n        <div class=\"flex items-center gap-3\"><span class=\"text-3xl\">\u26A1</span><div><div class=\"font-black text-lg text-white\">\u0633\u0637\u062D \u0642\u062F\u0631\u062A EP</div><div class=\"text-xs text-gray-400\">\u0642\u062F\u0631\u062A \u062C\u0645\u0639\u06CC \u0627\u0639\u0636\u0627\u06CC \u0641\u0639\u0627\u0644 \u06A9\u0644\u0646</div></div></div>\n        <div class=\"text-3xl font-black text-amber-300\">".concat(fa(pct), "\u066A</div>\n      </div>\n      <div class=\"pbar\"><div class=\"pfill\" style=\"width:").concat(pct, "%\"></div></div>\n      <div class=\"flex justify-between text-xs text-gray-400 mt-2\"><span>\u06F0</span><span>\u06F1\u06F0</span><span>\u062D\u062F\u0627\u06A9\u062B\u0631 \u0642\u062F\u0631\u062A \u06F2\u06F0</span></div>\n    </div>\n    <div class=\"grid grid-cols-2 gap-3 mb-4\">\n      ").concat(card('♟', fa(players.length), 'کل اعضا', '129 140 248'), "\n      ").concat(card('👑', fa(players.filter(function (p) { return p.type !== 'new'; }).length), 'اعضای قدیمی', '253 186 116'), "\n      ").concat(card('✦', fa(players.filter(function (p) { return p.type === 'new'; }).length), 'اعضای جدید', '244 114 182'), "\n      ").concat(card('◉', fa(players.filter(isActive).length), 'اعضای فعال', '52 211 153'), "\n      ").concat(card('○', fa(players.filter(function (p) { return !isActive(p); }).length), 'کم‌فعال / غیرفعال', '56 189 248'), "\n      ").concat(card('⚡', fa1(avg), 'میانگین قدرت از ۲۰', '252 211 77', true), "\n    </div>\n    <div class=\"card p-5\" style=\"--c:129 140 248\">\n      <div class=\"flex items-center justify-between mb-3 pb-3 border-b border-white/10\">\n        <h3 class=\"font-black text-white\">\u26A1 \u0628\u0631\u062A\u0631\u06CC\u0646 \u0627\u0639\u0636\u0627\u06CC EP</h3>\n        ").concat(ranked.length > 5 ? "<button onclick=\"statsAll=!statsAll;renderStats()\" class=\"text-xs px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold\">".concat(statsAll ? 'نمایش کمتر' : 'مشاهده همه', "</button>") : '', "\n      </div>\n      ").concat(shown.length ? shown.map(function (p, i) { return "<div class=\"flex items-center gap-3 py-2 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\">\n        <span class=\"w-6 text-center font-black text-indigo-300\">").concat(fa(i + 1), "</span>\n        <span class=\"font-bold text-white truncate w-32 shrink-0\">").concat(esc(p.gameName), "</span>\n        <div class=\"pbar flex-1\"><div class=\"pfill\" style=\"width:").concat(p.power / 20 * 100, "%\"></div></div>\n        <span class=\"font-black text-amber-300 text-sm w-14 text-left\">").concat(fa(p.power), "/\u06F2\u06F0</span>\n      </div>"); }).join('') : '<div class="text-center text-gray-500 text-sm py-4">هنوز قدرتی برای اعضا ثبت نشده. مدیر در پنل مدیریت قدرت هر عضو را وارد می‌کند.</div>', "\n    </div>\n    <p class=\"text-xs text-gray-500 mt-3\">\u0639\u0636\u0648 \u00AB\u0641\u0639\u0627\u0644\u00BB \u06CC\u0639\u0646\u06CC \u0645\u06CC\u0632\u0627\u0646 \u0641\u0639\u0627\u0644\u06CC\u062A \u06F5\u06F0\u066A \u06CC\u0627 \u0628\u06CC\u0634\u062A\u0631. \u0633\u0637\u062D \u0642\u062F\u0631\u062A\u060C \u0645\u06CC\u0627\u0646\u06AF\u06CC\u0646 \u0642\u062F\u0631\u062A \u0627\u0639\u0636\u0627\u06CC \u0641\u0639\u0627\u0644 \u0646\u0633\u0628\u062A \u0628\u0647 \u062D\u062F\u0627\u06A9\u062B\u0631 \u06F2\u06F0 \u0627\u0633\u062A.</p>");
+    $('statsBody').innerHTML = "\n    <div class=\"card p-5 mb-4\" style=\"--c:252 211 77\">\n      <div class=\"flex items-center justify-between mb-4\">\n        <div class=\"flex items-center gap-3\"><span class=\"text-3xl\">\u26A1</span><div><div class=\"font-black text-lg text-white\">\u0633\u0637\u062D \u0642\u062F\u0631\u062A EP</div><div class=\"text-xs text-gray-400\">\u0642\u062F\u0631\u062A \u062C\u0645\u0639\u06CC \u0627\u0639\u0636\u0627\u06CC \u0641\u0639\u0627\u0644 \u06A9\u0644\u0646</div></div></div>\n        <div class=\"text-3xl font-black text-amber-300\">".concat(fa(pct), "\u066A</div>\n      </div>\n      <div class=\"pbar\"><div class=\"pfill\" style=\"width:").concat(pct, "%\"></div></div>\n      <div class=\"flex justify-between text-xs text-gray-400 mt-2\"><span>\u06F0</span><span>\u06F1\u06F0</span><span>\u062D\u062F\u0627\u06A9\u062B\u0631 \u0642\u062F\u0631\u062A \u06F2\u06F0</span></div>\n    </div>\n    <div class=\"grid grid-cols-2 gap-3 mb-4\">\n      ").concat(card('♟', fa(players.length), 'کل اعضا', '129 140 248'), "\n      ").concat(card('👑', fa(players.filter(function (p) { return p.type !== 'new'; }).length), 'اعضای قدیمی', '253 186 116'), "\n      ").concat(card('✦', fa(players.filter(function (p) { return p.type === 'new'; }).length), 'اعضای جدید', '244 114 182'), "\n      ").concat(card('◉', fa(players.filter(isActive).length), 'اعضای فعال', '52 211 153'), "\n      ").concat(card('○', fa(players.filter(function (p) { return !isActive(p); }).length), 'کم‌فعال / غیرفعال', '56 189 248'), "\n      ").concat(card('⚡', fa1(avg), 'میانگین قدرت از ۲۰', '252 211 77', true), "\n    </div>\n    <div class=\"card p-5\" style=\"--c:129 140 248\">\n      <div class=\"flex items-center justify-between mb-3 pb-3 border-b border-white/10\">\n        <h3 class=\"font-black text-white\">\u26A1 \u0628\u0631\u062A\u0631\u06CC\u0646 \u0627\u0639\u0636\u0627\u06CC EP</h3>\n        ").concat(ranked.length > 5 ? "<button onclick=\"statsAll=!statsAll;renderStats()\" class=\"text-xs px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold\">".concat(statsAll ? 'نمایش کمتر' : 'مشاهده همه', "</button>") : '', "\n      </div>\n      ").concat(shown.length ? shown.map(function (p, i) { return "<div class=\"flex items-center gap-3 py-2 cursor-pointer\" onclick=\"openProfile('".concat(p.id, "')\">\n        <span class=\"w-6 text-center font-black text-indigo-300\">").concat(fa(i + 1), "</span>\n        <span class=\"font-bold text-white truncate w-32 shrink-0\">").concat(nm(p), "</span>\n        <div class=\"pbar flex-1\"><div class=\"pfill\" style=\"width:").concat(p.power / 20 * 100, "%\"></div></div>\n        <span class=\"font-black text-amber-300 text-sm w-14 text-left\">").concat(fa(p.power), "/\u06F2\u06F0</span>\n      </div>"); }).join('') : '<div class="text-center text-gray-500 text-sm py-4">هنوز قدرتی برای اعضا ثبت نشده. مدیر در پنل مدیریت قدرت هر عضو را وارد می‌کند.</div>', "\n    </div>\n    <p class=\"text-xs text-gray-500 mt-3\">\u0639\u0636\u0648 \u00AB\u0641\u0639\u0627\u0644\u00BB \u06CC\u0639\u0646\u06CC \u0645\u06CC\u0632\u0627\u0646 \u0641\u0639\u0627\u0644\u06CC\u062A \u06F5\u06F0\u066A \u06CC\u0627 \u0628\u06CC\u0634\u062A\u0631. \u0633\u0637\u062D \u0642\u062F\u0631\u062A\u060C \u0645\u06CC\u0627\u0646\u06AF\u06CC\u0646 \u0642\u062F\u0631\u062A \u0627\u0639\u0636\u0627\u06CC \u0641\u0639\u0627\u0644 \u0646\u0633\u0628\u062A \u0628\u0647 \u062D\u062F\u0627\u06A9\u062B\u0631 \u06F2\u06F0 \u0627\u0633\u062A.</p>");
 }
 /* ---------- Weekly scores, chats & analysis ---------- */
 var weeks = load('ep_weeks', []);
@@ -607,7 +614,7 @@ function renderAnalysis() {
     var first = key === 'chats' ? stat('مجموع چت تیم', fa(tot), withD.length ? badge(sumD) : '<span class="text-gray-500">—</span>', '165 180 252') : stat('میانگین تیم', fa(avg), avgD === null ? '<span class="text-gray-500">—</span>' : badge(avgD), '52 211 153');
     body.innerHTML = chartBox + "\n    <div class=\"grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5\">\n      ".concat(first, "\n      ").concat(stat('بیشترین رشد', up ? esc(up.p.gameName) : '—', up ? badge(up.d) : '<span class="text-gray-500">رشدی ثبت نشده</span>', '52 211 153'), "\n      ").concat(stat('بیشترین افت', down ? esc(down.p.gameName) : '—', down ? badge(down.d) : '<span class="text-gray-500">افتی ثبت نشده</span>', '244 63 94'), "\n    </div>\n    <div class=\"space-y-2\">").concat(rows.map(function (r, i) {
         var t = r.hist.length > 1 ? r.hist[r.hist.length - 1] - r.hist[0] : 0;
-        return "<div class=\"card p-3 flex items-center gap-3 cursor-pointer\" onclick=\"openProfile('".concat(r.p.id, "')\">\n        <span class=\"w-7 h-7 rounded-full bg-emerald-400/15 text-emerald-300 text-xs font-black flex items-center justify-center shrink-0\">").concat(fa(i + 1), "</span>\n        <div class=\"min-w-0\"><div class=\"font-bold text-white truncate\">").concat(esc(r.p.gameName), "</div><div class=\"text-xs text-gray-400\">").concat(esc(r.p.realName), "</div></div>\n        <div class=\"mr-auto flex items-center gap-3\">").concat(spark(r.hist, t >= 0 ? '#34d399' : '#fb7185'), "<span class=\"font-black text-white w-12 text-center\">").concat(fa(r.cur), "</span>").concat(badge(r.d), "</div>\n      </div>");
+        return "<div class=\"card p-3 flex items-center gap-3 cursor-pointer\" onclick=\"openProfile('".concat(r.p.id, "')\">\n        <span class=\"w-7 h-7 rounded-full bg-emerald-400/15 text-emerald-300 text-xs font-black flex items-center justify-center shrink-0\">").concat(fa(i + 1), "</span>\n        <div class=\"min-w-0\"><div class=\"font-bold text-white truncate\">").concat(nm(r.p), "</div><div class=\"text-xs text-gray-400\">").concat(esc(r.p.realName), "</div></div>\n        <div class=\"mr-auto flex items-center gap-3\">").concat(spark(r.hist, t >= 0 ? '#34d399' : '#fb7185'), "<span class=\"font-black text-white w-12 text-center\">").concat(fa(r.cur), "</span>").concat(badge(r.d), "</div>\n      </div>");
     }).join(''), "</div>\n    <p class=\"text-xs text-gray-500 mt-3\">\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0633\u0628\u062A \u0628\u0647 ").concat(selW > 0 ? esc(weeks[selW - 1].label) : 'هفته قبل (هنوز وجود ندارد)', " \u062D\u0633\u0627\u0628 \u0634\u062F\u0647 \u0627\u0633\u062A.</p>");
     body.querySelector('select').value = chartPid;
 }
@@ -806,6 +813,10 @@ var gateFails = 0, gateBlockUntil = 0;
 function gateOpen() { document.body.classList.remove('locked'); $('gate').style.display = 'none'; }
 function gateMsg(t) { $('gateMsg').textContent = t; }
 function gateLogin() {
+    if (SERVER_URL) {
+        gateLoginServer();
+        return;
+    }
     if (Date.now() < gateBlockUntil) {
         gateMsg('چند بار اشتباه زدی. چند ثانیه صبر کن و دوباره تلاش کن.');
         return;
@@ -834,25 +845,276 @@ function gateAdminLogin() {
         return;
     }
     save('ep_session', '__admin__');
+    adminPassMem = $('gateAdminPass').value;
     gateOpen();
     grantAdmin();
     renderWho();
 }
-function gateLogout() { save('ep_session', ''); location.reload(); }
+function gateLogout() { save('ep_session', ''); save('ep_srv', null); location.reload(); }
 function renderWho() {
     var sess = load('ep_session', ''), p = byId(sess), box = $('whoBox');
     if (!box)
         return;
-    var name = p ? esc(p.gameName) : (sess === '__admin__' ? 'مدیر' : '');
+    var ss = load('ep_srv', null);
+    var name = p ? nm(p) : (ss && ss.n ? esc(ss.n) + (ss.a ? ' <span class="admin-tag">👑 ادمین</span>' : '') : (sess === '__admin__' ? 'مدیر' : ''));
     box.innerHTML = name ? '👋 خوش آمدی <b class="text-white">' + name + '</b> · <button onclick="gateLogout()" class="underline text-teal-300">خروج</button>' : '';
 }
 function gateCheck() {
+    if (SERVER_URL) {
+        gateCheckServer();
+        if (AUTH_URL)
+            $('gateAdminLink').style.display = 'none';
+        return;
+    }
     var sess = load('ep_session', '');
     var p = byId(sess);
     if ((p && normCode(p.code) && normCode(p.code) !== '-') || sess === '__admin__')
         gateOpen();
     if (AUTH_URL)
         $('gateAdminLink').style.display = 'none';
+}
+
+"use strict";
+/* ---------- Admin panel & team admins ---------- */
+var adminPlayerQ = '';
+var nm = function (p) { return esc(p.gameName) + (p.admin ? ' <span class="admin-tag">👑 ادمین</span>' : ''); };
+var initial = function (p) { return (String(p.gameName).replace(/[^A-Za-z0-9\u0600-\u06FF]/g, '').charAt(0) || 'EP').toUpperCase(); };
+function toast(msg) {
+    var t = $('toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100000;background:#0f766e;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .25s;opacity:0;pointer-events:none;max-width:90vw;text-align:center';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(function () { t.style.opacity = '0'; }, 2300);
+}
+function renderAdminPlayersList() {
+    var q = adminPlayerQ.trim().toLowerCase(), admins = players.filter(function (p) { return p.admin; }).length;
+    $('adminPlayersSummary').innerHTML = '👥 ' + fa(players.length) + ' عضو &nbsp;·&nbsp; 👑 ' + fa(admins) + ' ادمین &nbsp;·&nbsp; برای ادمین کردن روی ⭐ بزن';
+    var rows = players.map(function (p, i) { return ({ p: p, i: i }); })
+        .filter(function (r) { return !q || [r.p.realName, r.p.gameName, r.p.code].some(function (v) { return String(v).toLowerCase().includes(q); }); })
+        .sort(function (a, b) { return (b.p.admin ? 1 : 0) - (a.p.admin ? 1 : 0); });
+    $('adminPlayersList').innerHTML = rows.length ? rows.map(function (r) {
+        var p = r.p, i = r.i;
+        return "<div class=\"flex items-center gap-3 p-2.5 rounded-xl border ".concat(p.admin ? 'border-amber-300/50 bg-amber-400/5' : 'border-teal-300/15 bg-black/30', "\">\n      <div class=\"w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-black text-sm ").concat(p.admin ? 'text-amber-950' : 'bg-teal-400/15 text-teal-200', "\" style=\"").concat(p.admin ? 'background:linear-gradient(135deg,#fde68a,#f59e0b)' : '', "\">").concat(esc(initial(p)), "</div>\n      <div class=\"min-w-0 flex-1\"><div class=\"font-bold text-white text-sm truncate\">").concat(nm(p), "</div><div class=\"text-xs text-gray-400 truncate\">").concat(esc(p.realName), " \u00B7 ").concat(esc(p.role), "</div></div>\n      <div class=\"flex gap-1.5 shrink-0\">\n        <button class=\"ib ").concat(p.admin ? 'on' : '', "\" title=\"").concat(p.admin ? 'برداشتن ادمین' : 'ادمین کردن', "\" onclick=\"toggleAdminFlag(").concat(i, ")\">\u2B50</button>\n        <button class=\"ib\" title=\"\u0648\u06CC\u0631\u0627\u06CC\u0634\" onclick=\"editPlayer(").concat(i, ")\">\u270E</button>\n        <button class=\"ib danger\" title=\"\u062D\u0630\u0641 (\u0627\u0646\u062A\u0642\u0627\u0644 \u0628\u0647 \u0622\u0631\u0634\u06CC\u0648)\" onclick=\"deletePlayer(").concat(i, ")\">\uD83D\uDDD1</button>\n      </div></div>");
+    }).join('') : '<div class="text-sm text-gray-500 text-center py-4">بازیکنی پیدا نشد.</div>';
+}
+function toggleAdminFlag(i) {
+    var p = players[i];
+    p.admin = !p.admin;
+    savePlayersToStorage();
+    renderAll();
+    renderAdminAll();
+    toast(p.admin ? '👑 ' + p.gameName + ' ادمین شد' : p.gameName + ' دیگر ادمین نیست');
+}
+function openPlayerForm() {
+    resetForm();
+    $('playerFormBox').classList.remove('hidden');
+    $('newGameName').focus();
+}
+function closePlayerForm() { resetForm(); $('playerFormBox').classList.add('hidden'); }
+function resetForm() {
+    $('editIndex').value = -1;
+    ['newRealName', 'newGameName', 'newBale', 'newPhone', 'newRank', 'newRole', 'newCode', 'newActivity', 'newPower'].forEach(function (id) { $(id).value = ''; });
+    $('newType').value = 'old';
+    $('newAdmin').checked = false;
+    $('formTitle').innerText = 'بازیکن جدید';
+}
+function editPlayer(i) {
+    var p = players[i];
+    $('editIndex').value = i;
+    $('newRealName').value = p.realName;
+    $('newGameName').value = p.gameName;
+    $('newBale').value = p.bale;
+    $('newPhone').value = p.phone && p.phone !== '-' ? p.phone : '';
+    $('newRank').value = p.rank;
+    $('newRole').value = p.role;
+    $('newCode').value = p.code;
+    $('newActivity').value = p.activity;
+    $('newType').value = p.type === 'new' ? 'new' : 'old';
+    $('newPower').value = typeof p.power === 'number' ? p.power : '';
+    $('newAdmin').checked = !!p.admin;
+    $('formTitle').innerText = 'ویرایش ' + p.gameName;
+    var box = $('playerFormBox');
+    box.classList.remove('hidden');
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function savePlayer() {
+    var idx = parseInt($('editIndex').value), g = function (id) { return $(id).value.trim(); };
+    if (!g('newGameName') && !g('newRealName')) {
+        toast('حداقل نام بازی یا نام واقعی را بنویس');
+        return;
+    }
+    var base = idx >= 0 && players[idx] ? players[idx] : {};
+    var code = g('newCode') || '-';
+    if (code !== '-' && players.some(function (p, j) { return j !== idx && normCode(p.code) === normCode(code); })) {
+        toast('این کد بازی برای عضو دیگری ثبت شده است');
+        return;
+    }
+    var np = Object.assign({}, base, {
+        id: base.id || uid(), realName: g('newRealName') || 'ناشناس', gameName: g('newGameName') || 'EP Player',
+        bale: g('newBale') || '-', phone: g('newPhone') || '-', rank: g('newRank') || '-', role: g('newRole') || 'عضو عادی',
+        code: code, activity: g('newActivity') || '100%', type: $('newType').value === 'new' ? 'new' : 'old', admin: $('newAdmin').checked
+    });
+    if (g('newPower') !== '')
+        np.power = Math.min(20, Math.max(0, Number(g('newPower'))));
+    else
+        delete np.power;
+    if (idx === -1)
+        players.push(np);
+    else
+        players[idx] = np;
+    savePlayersToStorage();
+    renderAll();
+    renderAdminAll();
+    closePlayerForm();
+    toast('✅ ذخیره شد');
+}
+
+"use strict";
+/* ---------- Shared server: logins & log ---------- */
+// آدرس Worker را اینجا بگذار (مثلا 'https://xxx.workers.dev'). خالی باشد، ورود فقط روی همین گوشی بررسی می‌شود.
+var SERVER_URL = 'https://ep-db.mohammadhoseinnajafi1390.workers.dev';
+var adminPassMem = '', syncTimer = null, logsCache = [];
+function srv(path, body) {
+    return fetch(SERVER_URL + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) }).then(function (r) { return r.json(); });
+}
+function adminPass() {
+    if (!adminPassMem) {
+        var v = prompt('رمز مدیر را وارد کن:');
+        if (v)
+            adminPassMem = v;
+    }
+    return adminPassMem;
+}
+function schedSync() {
+    if (!SERVER_URL || !adminPassMem)
+        return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(function () { return syncNow(true); }, 1500);
+}
+function syncNow(silent) {
+    if (!SERVER_URL)
+        return;
+    if (silent && !adminPassMem)
+        return;
+    var pass = adminPass();
+    if (!pass)
+        return;
+    var members = players.filter(function (p) { return normCode(p.code) && normCode(p.code) !== '-'; }).map(function (p) { return ({ c: p.code, n: p.gameName, a: !!p.admin }); });
+    srv('/admin/sync', { pass: pass, members: members }).then(function (d) {
+        if (d.ok) {
+            if (!silent)
+                toast('✅ ' + fa(d.count) + ' عضو با سرور همگام شد');
+        }
+        else {
+            adminPassMem = '';
+            toast('رمز مدیر اشتباه است');
+        }
+    }).catch(function () { if (!silent)
+        toast('اتصال به سرور برقرار نشد'); });
+}
+function gateLoginServer() {
+    if (Date.now() < gateBlockUntil) {
+        gateMsg('چند بار اشتباه زدی. چند ثانیه صبر کن.');
+        return;
+    }
+    var code = $('gateCode').value.trim(), team = $('gateTeam').value.trim();
+    if (!code || !team) {
+        gateMsg('هر دو کادر را پر کن.');
+        return;
+    }
+    gateMsg('در حال بررسی...');
+    srv('/login', { code: code, team: team }).then(function (d) {
+        if (d.ok) {
+            save('ep_srv', { n: d.name, c: code, a: !!d.admin });
+            save('ep_lastvisit', Date.now());
+            gateMsg('');
+            gateOpen();
+            renderWho();
+        }
+        else {
+            gateFails++;
+            if (gateFails >= 5) {
+                gateFails = 0;
+                gateBlockUntil = Date.now() + 30000;
+                gateMsg('چند بار اشتباه زدی. ۳۰ ثانیه صبر کن.');
+            }
+            else
+                gateMsg('کد بازی یا کد ورود تیم اشتباه است.');
+        }
+    }).catch(function () { return gateMsg('اتصال به سرور برقرار نشد. اینترنت را چک کن.'); });
+}
+function gateCheckServer() {
+    var s = load('ep_srv', null), adm = load('ep_session', '') === '__admin__';
+    if (adm)
+        gateOpen();
+    if (s && s.c) {
+        gateOpen();
+        var due_1 = Date.now() - Number(load('ep_lastvisit', 0)) > 6 * 3600 * 1000;
+        srv('/visit', { code: s.c, log: due_1 }).then(function (d) {
+            if (d.ok) {
+                if (due_1)
+                    save('ep_lastvisit', Date.now());
+            }
+            else if (!adm) {
+                save('ep_srv', null);
+                location.reload();
+            }
+        }).catch(function () { });
+    }
+}
+function fmtTime(t) {
+    try {
+        return new Date(t).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    catch (e) {
+        return '';
+    }
+}
+function renderAdminLog() {
+    var box = $('adminLogBody');
+    if (!box)
+        return;
+    if (!SERVER_URL) {
+        box.innerHTML = '<div class="text-sm text-amber-200 bg-amber-400/10 border border-amber-300/30 rounded-xl p-4 leading-7">سرور وصل نیست. آدرس Worker را در <b>app.js</b> جلوی <b>SERVER_URL</b> بگذار و فایل را دوباره آپلود کن.</div>';
+        return;
+    }
+    var pass = adminPass();
+    if (!pass) {
+        box.innerHTML = '<div class="text-sm text-gray-400 text-center py-4">برای دیدن لاگ، رمز مدیر لازم است.</div>';
+        return;
+    }
+    box.innerHTML = '<div class="text-sm text-gray-400 text-center py-4">در حال دریافت...</div>';
+    srv('/admin/logs', { pass: pass }).then(function (d) {
+        if (!d.ok) {
+            adminPassMem = '';
+            box.innerHTML = '<div class="text-sm text-rose-300 text-center py-4">رمز مدیر اشتباه است.</div>';
+            return;
+        }
+        logsCache = d.logs || [];
+        var now = Date.now(), day = 24 * 3600 * 1000;
+        var uniq = function (ms) { var s = {}; logsCache.filter(function (l) { return now - l.t < ms; }).forEach(function (l) { s[l.n] = 1; }); return Object.keys(s); };
+        var today = uniq(day), week = uniq(7 * day), seen = uniq(31 * day);
+        var missing = players.filter(function (p) { return normCode(p.code) && normCode(p.code) !== '-' && seen.indexOf(p.gameName) < 0; });
+        var card = function (v, l) { return '<div class="bg-black/30 border border-teal-300/20 rounded-xl p-3 text-center"><div class="font-black text-white text-lg">' + fa(v) + '</div><div class="text-[11px] text-gray-400">' + l + '</div></div>'; };
+        box.innerHTML = "\n      <div class=\"grid grid-cols-3 gap-2\">".concat(card(today.length, 'امروز')).concat(card(week.length, '۷ روز اخیر')).concat(card(d.members || 0, 'کد ثبت‌شده در سرور'), "</div>\n      <div class=\"text-xs text-gray-300 bg-black/25 rounded-xl p-3 leading-7\">\u23F3 \u0647\u0646\u0648\u0632 \u0648\u0627\u0631\u062F \u0646\u0634\u062F\u0647\u200C\u0627\u0646\u062F (\u0645\u0627\u0647 \u0627\u062E\u06CC\u0631): <span class=\"text-amber-200\">").concat(missing.length ? missing.map(function (p) { return esc(p.gameName); }).join('، ') : 'همه وارد شده‌اند 🎉', "</span></div>\n      <div class=\"space-y-1.5\">").concat(logsCache.slice(0, 120).map(function (l) { return "\n        <div class=\"flex items-center justify-between gap-2 bg-black/30 rounded-lg px-3 py-2 text-sm\">\n          <span class=\"font-bold text-white truncate\">".concat(esc(l.n), "</span>\n          <span class=\"flex items-center gap-2 shrink-0\"><span class=\"text-[11px] px-2 py-0.5 rounded-full ").concat(l.k === 'login' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-sky-500/20 text-sky-300', "\">").concat(l.k === 'login' ? '🔑 ورود' : '👀 بازدید', "</span><span class=\"text-xs text-gray-400\">").concat(esc(fmtTime(l.t)), "</span></span>\n        </div>"); }).join('') || '<div class="text-sm text-gray-500 text-center py-4">هنوز ورودی ثبت نشده.</div>', "</div>");
+    }).catch(function () { box.innerHTML = '<div class="text-sm text-rose-300 text-center py-4">اتصال به سرور برقرار نشد.</div>'; });
+}
+function clearLogs() {
+    if (!confirm('کل لیست ورودها پاک شود؟'))
+        return;
+    var pass = adminPass();
+    if (!pass)
+        return;
+    srv('/admin/clear', { pass: pass }).then(function (d) { if (d.ok) {
+        toast('لیست پاک شد');
+        renderAdminLog();
+    } });
 }
 
 gateCheck();
