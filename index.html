@@ -16,6 +16,14 @@ window.addEventListener('load', function () {
   }, 600);
 });
 </script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0a1a24">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="تیم EP">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>تیم EP | تورنمنت‌ها و جستجوی اعضا</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -24,7 +32,7 @@ body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(900px 500px a
 .glass{background:rgba(12,28,38,.72);backdrop-filter:blur(14px);border:1px solid rgba(94,234,212,.22)}
 .sec{--c:45 212 191;background:linear-gradient(180deg,rgb(var(--c)/.10),rgba(10,24,34,.8));border:1px solid rgb(var(--c)/.3);border-top:3px solid rgb(var(--c));border-radius:1.5rem;padding:1.5rem;scroll-margin-top:5.5rem;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .sec h2{color:rgb(var(--c));font-weight:800;font-size:1.25rem}
-.s-search{--c:45 212 191}.s-tour{--c:129 140 248}.s-top{--c:253 186 116}.s-teams{--c:56 189 248}.s-analysis{--c:52 211 153}.s-stats{--c:244 114 182}.s-archive{--c:148 163 184}.s-edu{--c:251 146 60}
+.s-search{--c:45 212 191}.s-tour{--c:129 140 248}.s-top{--c:253 186 116}.s-teams{--c:56 189 248}.s-analysis{--c:52 211 153}.s-stats{--c:244 114 182}.s-archive{--c:148 163 184}.s-edu{--c:251 146 60}.s-me{--c:252 211 77}.s-news{--c:251 113 133}
 .pbar{height:16px;border-radius:999px;background:rgba(0,0,0,.55);padding:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
 .pfill{height:100%;border-radius:999px;background:linear-gradient(90deg,#fcd34d,#5eead4 50%,#818cf8);transition:width .6s}
 .card{background:rgba(4,14,22,.55);border:1px solid rgb(var(--c)/.3);border-radius:16px;transition:.25s}
@@ -64,12 +72,42 @@ body{font-family:'Vazirmatn',sans-serif;background:radial-gradient(900px 500px a
 .ib.on{background:linear-gradient(135deg,#fde68a,#f59e0b);color:#422006;border-color:transparent}
 .ib.danger:hover{background:rgba(244,63,94,.4)}
 body.locked > div.max-w-5xl{display:none}
+
+.card{position:relative;overflow:hidden;backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.06)}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(260px 120px at 0% 0%,rgb(var(--c)/.14),transparent 70%);pointer-events:none}
+.card:hover{box-shadow:0 10px 30px rgb(var(--c)/.25),0 0 0 1px rgb(var(--c)/.5),inset 0 1px 0 rgba(255,255,255,.1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sec:not(.hidden) .card,.sec:not(.hidden) .fifa{animation:rise .5s backwards}
+.sec:not(.hidden) .card:nth-child(2){animation-delay:.07s}.sec:not(.hidden) .card:nth-child(3){animation-delay:.14s}.sec:not(.hidden) .card:nth-child(4){animation-delay:.21s}.sec:not(.hidden) .card:nth-child(n+5){animation-delay:.28s}
+@keyframes shine{0%{left:-60%}60%,100%{left:140%}}
+.fifa{max-width:290px;margin:0 auto 16px;padding:18px 18px 14px;border-radius:26px 26px 40px 40px;position:relative;overflow:hidden;color:var(--ft);background:var(--fb);box-shadow:0 14px 34px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.35)}
+.fifa::after{content:"";position:absolute;top:-50%;left:-60%;width:40%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:rotate(20deg);animation:shine 4s 1s infinite;pointer-events:none}
+.t-g{--fb:linear-gradient(160deg,#fde68a,#f59e0b 55%,#b45309);--ft:#3b2305}
+.t-s{--fb:linear-gradient(160deg,#f8fafc,#94a3b8 55%,#475569);--ft:#0f172a}
+.t-b{--fb:linear-gradient(160deg,#fdba74,#c2410c 55%,#7c2d12);--ft:#2b0f04}
+.t-x{--fb:linear-gradient(160deg,#1f9e8f,#6d6fd0 60%,#e9b98f);--ft:#fff}
+.fifa-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fifa-r b{display:block;font-size:46px;line-height:1;font-weight:900}
+.fifa-r span{font-size:12px;font-weight:800;opacity:.8}
+.fifa-av{width:92px;height:92px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:900;box-shadow:inset 0 0 0 3px rgba(255,255,255,.5)}
+.fifa-adm{position:absolute;top:10px;left:12px;font-size:10px;font-weight:900;background:#422006;color:#fde68a;padding:2px 8px;border-radius:999px}
+.fifa-nm{text-align:center;font-weight:900;font-size:20px;margin:10px 0 8px;border-bottom:2px solid rgba(0,0,0,.18);padding-bottom:8px;unicode-bidi:plaintext}
+.fifa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 6px;text-align:center}
+.fifa-grid b{display:block;font-size:17px;font-weight:900}.fifa-grid span{font-size:10px;font-weight:800;opacity:.75}
+.fifa-jd{text-align:center;font-size:10px;opacity:.7;margin-top:8px;font-weight:700}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+.stone{position:fixed;width:clamp(90px,26vw,170px);aspect-ratio:1;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234b5563'/%3E%3Cstop offset='.55' stop-color='%232a323d'/%3E%3Cstop offset='1' stop-color='%23151b23'/%3E%3C/linearGradient%3E%3Cfilter id='b' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='3'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M0 0H182L170 24L152 30L144 60L120 68L106 94L80 102L66 130L40 138L32 168L0 182Z' fill='url(%23g)' stroke='%230b1016' stroke-width='2'/%3E%3Cpath d='M0 0H120L96 20L70 26L52 50L28 56L16 84L0 92Z' fill='%23fff' opacity='.06'/%3E%3Cpath d='M182 0L170 24L152 30L144 60' fill='none' stroke='%23fff' opacity='.12' stroke-width='2'/%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 6L40 30L34 52L66 66L60 90L70 108L52 126L30 150' stroke='%2338bdf8' stroke-width='5' opacity='.55' filter='url(%23b)'/%3E%3Cpath d='M10 6L40 30L34 52L66 66L60 90L70 108L52 126L30 150' stroke='%237dd3fc' stroke-width='1.8'/%3E%3Cpath d='M34 52L12 74L20 100L4 120' stroke='%2338bdf8' stroke-width='1.4'/%3E%3Cpath d='M66 66L104 58L124 38L144 34' stroke='%2338bdf8' stroke-width='1.4'/%3E%3Cpath d='M60 90L40 104L44 128' stroke='%237dd3fc' stroke-width='1.1'/%3E%3C/g%3E%3Ccircle cx='120' cy='22' r='1.6' fill='%237dd3fc'/%3E%3Ccircle cx='88' cy='70' r='1.3' fill='%2338bdf8'/%3E%3Ccircle cx='30' cy='100' r='1.2' fill='%237dd3fc'/%3E%3Ccircle cx='140' cy='48' r='1.2' fill='%2338bdf8'/%3E%3C/svg%3E") no-repeat center/contain;pointer-events:none;z-index:0;animation:vein 4s ease-in-out infinite}
+.st-tl{top:0;left:0}.st-tr{top:0;right:0;transform:scaleX(-1)}.st-bl{bottom:0;left:0;transform:scaleY(-1)}.st-br{bottom:0;right:0;transform:scale(-1,-1)}
+@keyframes vein{0%,100%{filter:drop-shadow(0 0 3px rgba(56,189,248,.45))}50%{filter:drop-shadow(0 0 10px rgba(56,189,248,.95))}}
+body>div.max-w-5xl{position:relative;z-index:1}
 .hdr-glow{background:radial-gradient(circle at 50% 0,rgba(94,234,212,.2),transparent 70%),rgba(12,28,38,.72)}
 .grad-text{background:linear-gradient(135deg,#5eead4,#a5b4fc 60%,#fdba74);-webkit-background-clip:text;background-clip:text;color:transparent}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body class="p-3 md:p-8 locked">
+<div class="stone st-tl" aria-hidden="true"></div><div class="stone st-tr" aria-hidden="true"></div><div class="stone st-bl" aria-hidden="true"></div><div class="stone st-br" aria-hidden="true"></div>
 <div id="gate" class="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto" style="background:radial-gradient(900px 500px at 0% 0%,rgba(20,150,130,.35),transparent 60%),radial-gradient(800px 500px at 100% 100%,rgba(109,111,208,.3),transparent 60%),#06141b">
   <div class="glass rounded-3xl p-6 w-full max-w-sm text-center space-y-4">
     <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-lg" style="background:linear-gradient(135deg,#1f9e8f,#6d6fd0 60%,#e9b98f)">EP</div>
@@ -91,13 +129,15 @@ body.locked > div.max-w-5xl{display:none}
 <header class="glass rounded-2xl p-6 text-center relative overflow-hidden shadow-2xl hdr-glow">
   <h1 class="text-4xl md:text-5xl font-black grad-text mb-2">تیم EP</h1>
   <p class="text-gray-400 text-sm md:text-base">جستجوی بازیکنان، تورنمنت و ترکیب تیم‌ها</p>
-  <p class="text-[10px] text-gray-600 mt-1">نسخه ۲۱</p>
+  <p class="text-[10px] text-gray-600 mt-1">نسخه ۲۶</p>
   <div id="whoBox" class="text-xs text-teal-200 mt-2"></div>
   <button onclick="openAdminModal()" class="absolute top-3 left-3 bg-teal-400/15 hover:bg-teal-500 text-teal-100 hover:text-white px-3 py-2 rounded-xl text-xs md:text-sm transition border border-teal-300/30">⚙️ پنل مدیریت</button>
   <span class="adm absolute top-3 right-3 bg-green-600/30 text-green-300 text-xs px-3 py-1 rounded-full border border-green-500/40">حالت مدیر فعال</span>
 </header>
 
 <nav class="glass rounded-2xl p-2 sticky top-2 z-40 flex gap-2 overflow-x-auto justify-start md:justify-center shadow-xl">
+  <a href="#me" id="navMe" class="nv hidden" style="--c:252 211 77">👤 صفحه من</a>
+  <a href="#news" class="nv" style="--c:251 113 133">📢 اعلان‌ها<span id="newsBadge"></span></a>
   <a href="#search" class="nv" style="--c:45 212 191">🔍 جستجو</a>
   <a href="#stats" class="nv" style="--c:244 114 182">📊 آمار</a>
   <a href="#tour" class="nv" style="--c:129 140 248">⚔️ تورنمنت</a>
@@ -107,6 +147,18 @@ body.locked > div.max-w-5xl{display:none}
   <a href="#edu" class="nv" style="--c:251 146 60">📚 آموزش</a>
   <a href="#archive" class="nv" style="--c:148 163 184">🗃️ آرشیو</a>
 </nav>
+
+<!-- My page -->
+<section id="me" class="sec s-me">
+  <h2 class="mb-5">👤 صفحه من</h2>
+  <div id="meBody"></div>
+</section>
+
+<!-- News -->
+<section id="news" class="sec s-news">
+  <h2 class="mb-5">📢 اعلان‌ها و رویدادها</h2>
+  <div id="newsBody"></div>
+</section>
 
 <!-- Search -->
 <section id="search" class="sec s-search text-center">
@@ -204,7 +256,7 @@ body.locked > div.max-w-5xl{display:none}
     </div>
 
     <div id="adminDashboard" class="hidden flex-col min-h-0 flex-1">
-      <div id="adminTabs" class="flex gap-1.5 overflow-x-auto px-3 py-2 border-b border-white/10 bg-black/20"><button class="tab on" data-tab="players" onclick="showTab('players')"><span class="i">👥</span>بازیکنان</button><button class="tab" data-tab="prof" onclick="showTab('prof')"><span class="i">🪪</span>پروفایل</button><button class="tab" data-tab="stats" onclick="showTab('stats')"><span class="i">📊</span>آمار</button><button class="tab" data-tab="score" onclick="showTab('score')"><span class="i">📝</span>نمرات</button><button class="tab" data-tab="tour" onclick="showTab('tour')"><span class="i">⚔️</span>تورنمنت</button><button class="tab" data-tab="teams" onclick="showTab('teams')"><span class="i">🛡️</span>تیم‌ها</button><button class="tab" data-tab="top" onclick="showTab('top')"><span class="i">🏆</span>برتر</button><button class="tab" data-tab="edu" onclick="showTab('edu')"><span class="i">📚</span>آموزش</button><button class="tab" data-tab="log" onclick="showTab('log')"><span class="i">🔑</span>ورودها</button></div>
+      <div id="adminTabs" class="flex gap-1.5 overflow-x-auto px-3 py-2 border-b border-white/10 bg-black/20"><button class="tab on" data-tab="players" onclick="showTab('players')"><span class="i">👥</span>بازیکنان</button><button class="tab" data-tab="prof" onclick="showTab('prof')"><span class="i">🪪</span>پروفایل</button><button class="tab" data-tab="stats" onclick="showTab('stats')"><span class="i">📊</span>آمار</button><button class="tab" data-tab="score" onclick="showTab('score')"><span class="i">📝</span>نمرات</button><button class="tab" data-tab="tour" onclick="showTab('tour')"><span class="i">⚔️</span>تورنمنت</button><button class="tab" data-tab="teams" onclick="showTab('teams')"><span class="i">🛡️</span>تیم‌ها</button><button class="tab" data-tab="top" onclick="showTab('top')"><span class="i">🏆</span>برتر</button><button class="tab" data-tab="edu" onclick="showTab('edu')"><span class="i">📚</span>آموزش</button><button class="tab" data-tab="log" onclick="showTab('log')"><span class="i">🔑</span>ورودها</button><button class="tab" data-tab="news" onclick="showTab('news')"><span class="i">📢</span>اعلان</button></div>
       <div id="adminContent" class="overflow-y-auto p-4 space-y-4 flex-1">
 
       <div id="tab-players" class="space-y-3">
@@ -289,6 +341,11 @@ body.locked > div.max-w-5xl{display:none}
       </div>
 
 
+      <div id="tab-news" class="hidden space-y-3">
+        <p class="text-xs text-gray-400">اعلان و رویداد بنویس. بعد از ورود مدیر، همه چیز به سرور فرستاده می‌شود و اعضا با ورود می‌بینند. حضور هر رویداد را با 👥 ببین.</p>
+        <div id="adminNewsBody" class="space-y-3"></div>
+      </div>
+
       <div id="tab-log" class="hidden space-y-3">
         <p class="text-xs text-gray-400">اینجا می‌بینی چه کسی و کی وارد سایت شده. «ورود» یعنی با کد وارد شد و «بازدید» یعنی با ورود قبلی دوباره سر زد (هر ۶ ساعت یک بار ثبت می‌شود). لیست ۳۰ روز اخیر نگه داشته می‌شود.</p>
         <div class="flex gap-2">
@@ -303,6 +360,6 @@ body.locked > div.max-w-5xl{display:none}
   </div>
 </div>
 
-<script src="app.js?v=21" onerror="showErr('فایل app.js بارگذاری نشد. آن را کنار index.html در گیت‌هاب آپلود کن.')"></script>
+<script src="app.js?v=25" onerror="showErr('فایل app.js بارگذاری نشد. آن را کنار index.html در گیت‌هاب آپلود کن.')"></script>
 </body>
 </html>
